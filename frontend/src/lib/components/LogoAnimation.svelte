@@ -10,7 +10,7 @@
 
 	// Props
 	export let svgContent: string = '';
-	export let animationDuration: number = 2;
+	export let animationDuration: number = 1;
 	export let reverseDuration: number = 0.5;
 	export let perspective: number = 1200;
 	export let zIndex: number = -1;
@@ -46,73 +46,86 @@
 	}
 	let elementData: ElementData[] = [];
 
-	// Extract gradient colors from SVG defs
-	function extractGradientColors(svgString: string): Map<string, { start: string; end: string; angle: number }> {
-		const gradientMap = new Map<string, { start: string; end: string; angle: number }>();
-		const parser = new DOMParser();
-		const doc = parser.parseFromString(svgString, 'image/svg+xml');
+	// Gradient colors from the original SVG (orange to purple diagonal)
+	const GRADIENT_START = '#f28d1d'; // Orange
+	const GRADIENT_END = '#a40054';   // Purple
 
-		const gradients = doc.querySelectorAll('linearGradient');
-		gradients.forEach((gradient) => {
-			const id = gradient.getAttribute('id');
-			if (!id) return;
-
-			const stops = gradient.querySelectorAll('stop');
-			if (stops.length < 2) return;
-
-			// Extract colors from stop elements
-			const startStyle = stops[0].getAttribute('style') || '';
-			const endStyle = stops[stops.length - 1].getAttribute('style') || '';
-
-			const startMatch = startStyle.match(/stop-color:\s*([^;\s]+)/);
-			const endMatch = endStyle.match(/stop-color:\s*([^;\s]+)/);
-
-			const startColor = startMatch ? startMatch[1] : '#f28d1d';
-			const endColor = endMatch ? endMatch[1] : '#a40054';
-
-			// Get transform to determine angle (simplified - use default diagonal)
-			gradientMap.set(id, {
-				start: startColor,
-				end: endColor,
-				angle: 135 // Default diagonal gradient
-			});
-		});
-
-		return gradientMap;
+	// Parse hex color to RGB
+	function hexToRgb(hex: string): { r: number; g: number; b: number } {
+		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : { r: 242, g: 141, b: 29 }; // Default to orange
 	}
 
-	// Create individual SVG element with inline gradient and proper viewBox
+	// Convert RGB to hex
+	function rgbToHex(r: number, g: number, b: number): string {
+		return '#' + [r, g, b].map(x => {
+			const hex = Math.round(x).toString(16);
+			return hex.length === 1 ? '0' + hex : hex;
+		}).join('');
+	}
+
+	// Interpolate between two colors based on position (0-1)
+	function interpolateColor(color1: string, color2: string, t: number): string {
+		const c1 = hexToRgb(color1);
+		const c2 = hexToRgb(color2);
+		const clampedT = Math.max(0, Math.min(1, t));
+
+		return rgbToHex(
+			c1.r + (c2.r - c1.r) * clampedT,
+			c1.g + (c2.g - c1.g) * clampedT,
+			c1.b + (c2.b - c1.b) * clampedT
+		);
+	}
+
+	// Calculate position along diagonal gradient (0 = top-left/orange, 1 = bottom-right/purple)
+	function calculateGradientPosition(
+		elementCenterX: number,
+		elementCenterY: number,
+		logoBounds: { minX: number; minY: number; maxX: number; maxY: number }
+	): number {
+		// Normalize element position to 0-1 range within logo bounds
+		const normalizedX = (elementCenterX - logoBounds.minX) / (logoBounds.maxX - logoBounds.minX);
+		const normalizedY = (elementCenterY - logoBounds.minY) / (logoBounds.maxY - logoBounds.minY);
+
+		// For a 135-degree diagonal gradient (top-left to bottom-right),
+		// position along gradient is average of x and y progress
+		return (normalizedX + normalizedY) / 2;
+	}
+
+	// Create individual SVG element with position-based color and proper viewBox
 	function createElementSvg(
 		pathElement: Element,
-		gradientMap: Map<string, { start: string; end: string; angle: number }>,
-		bounds: { x: number; y: number; width: number; height: number }
+		bounds: { x: number; y: number; width: number; height: number },
+		gradientPosition: number
 	): string {
 		const pathD = pathElement.getAttribute('d') || '';
 		const transform = pathElement.getAttribute('transform') || '';
 		const style = pathElement.getAttribute('style') || '';
 
-		// Extract gradient ID from fill
-		const fillMatch = style.match(/fill:\s*url\(#([^)]+)\)/);
-		let fillStyle = 'fill: #f28d1d;'; // Default fallback
-		let gradientDef = '';
+		// Calculate color based on position in the original gradient
+		// Use a small gradient segment around the element's position for visual richness
+		const segmentSize = 0.15; // Each element shows 15% of the gradient
+		const startPos = Math.max(0, gradientPosition - segmentSize / 2);
+		const endPos = Math.min(1, gradientPosition + segmentSize / 2);
 
-		if (fillMatch) {
-			const gradientId = fillMatch[1];
-			const gradient = gradientMap.get(gradientId);
-			if (gradient) {
-				// Create inline gradient definition
-				const newGradientId = `gradient-${Math.random().toString(36).substr(2, 9)}`;
-				gradientDef = `
-					<defs>
-						<linearGradient id="${newGradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
-							<stop offset="0%" style="stop-color:${gradient.start};stop-opacity:1" />
-							<stop offset="100%" style="stop-color:${gradient.end};stop-opacity:1" />
-						</linearGradient>
-					</defs>
-				`;
-				fillStyle = `fill: url(#${newGradientId});`;
-			}
-		}
+		const startColor = interpolateColor(GRADIENT_START, GRADIENT_END, startPos);
+		const endColor = interpolateColor(GRADIENT_START, GRADIENT_END, endPos);
+
+		// Create inline gradient definition with the element's portion of the original gradient
+		const newGradientId = `gradient-${Math.random().toString(36).substr(2, 9)}`;
+		const gradientDef = `
+			<defs>
+				<linearGradient id="${newGradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+					<stop offset="0%" style="stop-color:${startColor};stop-opacity:1" />
+					<stop offset="100%" style="stop-color:${endColor};stop-opacity:1" />
+				</linearGradient>
+			</defs>
+		`;
+		const fillStyle = `fill: url(#${newGradientId});`;
 
 		// Remove the old fill from style and add new one
 		const cleanedStyle = style.replace(/fill:\s*url\([^)]+\);?/, '').replace(/stroke:\s*[^;]+;?/g, '').trim();
@@ -395,12 +408,34 @@
 		const svgWidth = viewBoxParts[2] || 2666.6667;
 		const svgHeight = viewBoxParts[3] || 2666.6667;
 
-		// Extract gradient definitions
-		const gradientMap = extractGradientColors(svgContent);
-
 		// Find all path elements
 		const paths = originalSvg.querySelectorAll('path');
 		if (paths.length === 0) return;
+
+		// First pass: calculate bounds of all paths to determine overall logo bounds
+		const pathBounds: { x: number; y: number; width: number; height: number }[] = [];
+		let logoBoundsMinX = Infinity, logoBoundsMinY = Infinity;
+		let logoBoundsMaxX = -Infinity, logoBoundsMaxY = -Infinity;
+
+		paths.forEach((path) => {
+			const bounds = getPathBounds(path);
+			pathBounds.push(bounds);
+
+			const centerX = bounds.x + bounds.width / 2;
+			const centerY = bounds.y + bounds.height / 2;
+
+			logoBoundsMinX = Math.min(logoBoundsMinX, centerX);
+			logoBoundsMinY = Math.min(logoBoundsMinY, centerY);
+			logoBoundsMaxX = Math.max(logoBoundsMaxX, centerX);
+			logoBoundsMaxY = Math.max(logoBoundsMaxY, centerY);
+		});
+
+		const logoBounds = {
+			minX: logoBoundsMinX,
+			minY: logoBoundsMinY,
+			maxX: logoBoundsMaxX,
+			maxY: logoBoundsMaxY
+		};
 
 		// Clear any existing animated elements
 		animatedElements.forEach(el => el.remove());
@@ -417,11 +452,14 @@
 
 		paths.forEach((path, index) => {
 			// Get path bounding box in SVG coordinates (with transform applied)
-			const pathBBox = getPathBounds(path);
+			const pathBBox = pathBounds[index];
 
 			// Calculate element center in SVG coordinates
 			const elCenterX = pathBBox.x + pathBBox.width / 2;
 			const elCenterY = pathBBox.y + pathBBox.height / 2;
+
+			// Calculate this element's position along the gradient
+			const gradientPos = calculateGradientPosition(elCenterX, elCenterY, logoBounds);
 
 			// Calculate offset from SVG center
 			const offsetX = (elCenterX - svgWidth / 2) * scaleFactor;
@@ -448,8 +486,8 @@
 				will-change: transform, opacity;
 			`;
 
-			// Create SVG with inline gradient and element-specific viewBox
-			wrapper.innerHTML = createElementSvg(path, gradientMap, pathBBox);
+			// Create SVG with position-based gradient colors
+			wrapper.innerHTML = createElementSvg(path, pathBBox, gradientPos);
 
 			// Style the inner SVG
 			const innerSvg = wrapper.querySelector('svg');
