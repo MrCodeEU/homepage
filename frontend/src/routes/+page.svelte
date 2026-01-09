@@ -33,12 +33,14 @@
 <!-- Background Logo Animation -->
 <LogoAnimation
 	svgContent={logoSvg}
-	animationSpeed={1}
+	animationDuration={2}
+	reverseDuration={0.5}
 	perspective={1200}
 	zIndex={-1}
 	logoScale={3}
-	edgePadding={150}
-	pathCurviness={0.4}
+	scrollThreshold={15}
+	windIntensity={1}
+	pathCurviness={1.2}
 />
 
 <div class="container">

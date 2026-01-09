@@ -2,147 +2,135 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import gsap from 'gsap';
-	import { ScrollTrigger } from 'gsap/ScrollTrigger';
 	import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 
 	if (browser) {
-		gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+		gsap.registerPlugin(MotionPathPlugin);
 	}
 
 	// Props
 	export let svgContent: string = '';
-	export let animationSpeed: number = 1;
+	export let animationDuration: number = 2;
+	export let reverseDuration: number = 0.5;
 	export let perspective: number = 1200;
 	export let zIndex: number = -1;
 	export let logoScale: number = 3;
-	export let edgePadding: number = 120;
-	export let pathCurviness: number = 0.5;
-	export let windIntensity: number = 1; // Multiplier for wind wobble in path
+	export let scrollThreshold: number = 15;
+	export let windIntensity: number = 1;
+	export let pathCurviness: number = 1.2;
 
 	// Internal state
 	let container: HTMLDivElement;
 	let svgContainer: HTMLDivElement;
 	let elements: Element[] = [];
-	let scrollTriggerInstance: ScrollTrigger | null = null;
 	let mainTimeline: gsap.core.Timeline | null = null;
 	let idleTweens: gsap.core.Tween[] = [];
 	let prefersReducedMotion = false;
 	let viewportWidth = 0;
 	let viewportHeight = 0;
 	let pageHeight = 0;
+	let isAnimatedOut = false;
+	let hasInitialized = false;
+	let isAbsoluteMode = false;
+
+	// Store initial positions for reverse animation
+	let initialContainerRect: DOMRect | null = null;
 
 	interface ElementData {
 		el: Element;
-		fullPath: { x: number; y: number }[];
-		scaleKeyframes: number[];
-		rotationKeyframes: number[];
-		maxRotateX: number;
-		maxRotateY: number;
+		startX: number;
+		startY: number;
+		targetX: number;
+		targetY: number;
+		path: { x: number; y: number }[];
+		targetRotation: number;
+		targetRotateX: number;
+		targetRotateY: number;
+		targetScale: number;
 	}
 	let elementData: ElementData[] = [];
 
-	// Generate path with wind wobble baked in
-	function generateFullPath(
-		el: Element,
-		centerX: number,
-		centerY: number,
-		index: number,
-		totalElements: number
-	): { path: { x: number; y: number }[]; scales: number[]; rotations: number[] } {
-		const rect = el.getBoundingClientRect();
-		const elCenterX = rect.left + rect.width / 2;
-		const elCenterY = rect.top + rect.height / 2;
+	// Generate random end position - distributed across FULL page height
+	function generateTargetPosition(index: number, totalElements: number): { x: number; y: number } {
+		// Y position: distribute across full page height
+		// Divide page into segments and place elements somewhat evenly
+		const segmentHeight = pageHeight / totalElements;
+		const segmentStart = index * segmentHeight;
+		const segmentEnd = (index + 1) * segmentHeight;
+		// Random position within this segment, with some padding
+		const padding = segmentHeight * 0.1;
+		const y = segmentStart + padding + Math.random() * (segmentEnd - segmentStart - padding * 2);
 
-		// Direction from logo center
-		let dx = elCenterX - centerX;
-		let dy = elCenterY - centerY;
-		const distance = Math.sqrt(dx * dx + dy * dy) || 1;
-		const normalizedDx = dx / distance;
-		const normalizedDy = dy / distance;
+		// X position: mostly left and right, ~10% in middle
+		// Keep elements well within viewport bounds
+		let x: number;
+		const roll = Math.random();
+		const edgePadding = 100; // Increased padding from edge
+		const elementSize = 80; // Approximate element size to keep fully visible
+		const safeLeft = edgePadding;
+		const safeRight = viewportWidth - edgePadding - elementSize;
+		const leftZoneEnd = viewportWidth * 0.25;
+		const rightZoneStart = viewportWidth * 0.75;
 
-		// Safe bounds
-		const safeWidth = (viewportWidth / 2) - edgePadding;
-		const safeHeight = (viewportHeight / 2) - edgePadding;
-
-		const points: { x: number; y: number }[] = [{ x: 0, y: 0 }];
-		const scales: number[] = [1];
-		const rotations: number[] = [0];
-
-		// Calculate total points based on page height
-		const scrollableHeight = pageHeight - viewportHeight;
-		// More points = more opportunity for wind wobble
-		const totalPoints = Math.max(8, Math.floor(scrollableHeight / 150));
-
-		// Initial spread
-		const spreadFactor = 0.25 + Math.random() * 0.15;
-		const baseSpreadX = normalizedDx * safeWidth * spreadFactor;
-		const baseSpreadY = normalizedDy * safeHeight * spreadFactor;
-
-		// Wind parameters unique to this element
-		const windFreqX = 2 + Math.random() * 2; // How many oscillations
-		const windFreqY = 2 + Math.random() * 2;
-		const windAmpX = (3 + Math.random() * 4) * windIntensity; // Amplitude in pixels
-		const windAmpY = (2 + Math.random() * 3) * windIntensity;
-		const windPhaseX = Math.random() * Math.PI * 2;
-		const windPhaseY = Math.random() * Math.PI * 2;
-
-		// Rotation wind
-		const rotWindFreq = 1.5 + Math.random() * 2;
-		const rotWindAmp = (2 + Math.random() * 3) * windIntensity;
-		const rotWindPhase = Math.random() * Math.PI * 2;
-
-		// Scale wind (depth bobbing)
-		const scaleWindFreq = 1 + Math.random() * 1.5;
-		const scaleWindAmp = 0.03 * windIntensity;
-		const scaleWindPhase = Math.random() * Math.PI * 2;
-
-		// Generate points along the main path with wind wobble
-		for (let i = 1; i <= totalPoints; i++) {
-			const t = i / totalPoints; // Progress 0 to 1
-
-			// Main drift path - gradual movement outward then slight return
-			const driftProgress = t < 0.7 ? t / 0.7 : 1 - (t - 0.7) / 0.3 * 0.2;
-			const mainX = baseSpreadX * driftProgress;
-			const mainY = baseSpreadY * driftProgress;
-
-			// Add wind wobble as sine waves
-			const windX = Math.sin(t * Math.PI * 2 * windFreqX + windPhaseX) * windAmpX;
-			const windY = Math.sin(t * Math.PI * 2 * windFreqY + windPhaseY) * windAmpY;
-
-			// Small perpendicular drift for variety
-			const perpAngle = Math.atan2(normalizedDy, normalizedDx) + Math.PI / 2;
-			const perpDrift = Math.sin(t * Math.PI * 3 + index) * safeWidth * 0.03;
-			const perpX = Math.cos(perpAngle) * perpDrift;
-			const perpY = Math.sin(perpAngle) * perpDrift;
-
-			const finalX = mainX + windX + perpX;
-			const finalY = mainY + windY + perpY;
-
-			points.push({
-				x: clamp(finalX, -safeWidth, safeWidth),
-				y: clamp(finalY, -safeHeight, safeHeight)
-			});
-
-			// Scale with wind bobbing for depth
-			const baseScale = 0.95 - t * 0.05; // Slight shrink as moves out
-			const scaleWind = Math.sin(t * Math.PI * 2 * scaleWindFreq + scaleWindPhase) * scaleWindAmp;
-			scales.push(baseScale + scaleWind);
-
-			// Rotation with wind
-			const baseRotation = (Math.random() - 0.5) * 30 * t; // Gradual rotation
-			const rotWind = Math.sin(t * Math.PI * 2 * rotWindFreq + rotWindPhase) * rotWindAmp;
-			rotations.push(baseRotation + rotWind);
+		if (roll < 0.45) {
+			// Left side (45%)
+			x = safeLeft + Math.random() * (leftZoneEnd - safeLeft);
+		} else if (roll < 0.90) {
+			// Right side (45%)
+			x = rightZoneStart + Math.random() * (safeRight - rightZoneStart);
+		} else {
+			// Middle (10%)
+			x = leftZoneEnd + Math.random() * (rightZoneStart - leftZoneEnd);
 		}
 
-		return { path: points, scales, rotations };
+		// Clamp to safe bounds
+		x = Math.max(safeLeft, Math.min(safeRight, x));
+
+		return { x, y };
 	}
 
-	function clamp(value: number, min: number, max: number): number {
-		return Math.max(min, Math.min(max, value));
+	// Generate a curved path from start to target (in absolute page coordinates)
+	function generatePath(
+		startX: number,
+		startY: number,
+		targetX: number,
+		targetY: number
+	): { x: number; y: number }[] {
+		const points: { x: number; y: number }[] = [];
+
+		// Start at origin (0,0 relative to element's current position)
+		points.push({ x: 0, y: 0 });
+
+		// Calculate the offset needed to reach target
+		const dx = targetX - startX;
+		const dy = targetY - startY;
+
+		// Add 2-3 control points for a nice curve
+		const numControlPoints = 2 + Math.floor(Math.random() * 2);
+
+		for (let i = 1; i <= numControlPoints; i++) {
+			const t = i / (numControlPoints + 1);
+			const baseX = dx * t;
+			const baseY = dy * t;
+
+			// Add perpendicular offset for curve
+			const perpOffset = (Math.random() - 0.5) * Math.min(viewportWidth, viewportHeight) * 0.4;
+			const angle = Math.atan2(dy, dx) + Math.PI / 2;
+
+			points.push({
+				x: baseX + Math.cos(angle) * perpOffset,
+				y: baseY + Math.sin(angle) * perpOffset
+			});
+		}
+
+		// End at target (relative offset from start)
+		points.push({ x: dx, y: dy });
+
+		return points;
 	}
 
 	function initAnimations() {
-		if (!browser || !svgContainer) return;
+		if (!browser || !svgContainer || hasInitialized) return;
 
 		prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		viewportWidth = window.innerWidth;
@@ -158,11 +146,32 @@
 
 		if (elements.length === 0) return;
 
-		const svgRect = svgContainer.getBoundingClientRect();
-		const centerX = svgRect.left + svgRect.width / 2;
-		const centerY = svgRect.top + svgRect.height / 2;
+		// Store container's initial position
+		initialContainerRect = svgContainer.getBoundingClientRect();
+
+		// Calculate the center of the logo in page coordinates (accounting for scroll)
+		const logoCenterX = initialContainerRect.left + initialContainerRect.width / 2;
+		const logoCenterY = initialContainerRect.top + initialContainerRect.height / 2 + window.scrollY;
 
 		elementData = elements.map((el, index) => {
+			const rect = el.getBoundingClientRect();
+			// Element's current position in page coordinates
+			const elCenterX = rect.left + rect.width / 2;
+			const elCenterY = rect.top + rect.height / 2 + window.scrollY;
+
+			// Generate random target position on the page (absolute coordinates)
+			const target = generateTargetPosition(index, elements.length);
+
+			// Generate curved path (offsets from current position)
+			const path = generatePath(elCenterX, elCenterY, target.x, target.y);
+
+			// Random 3D rotations and scale - keep elements larger and visible
+			const targetRotation = (Math.random() - 0.5) * 30;
+			const targetRotateX = (Math.random() - 0.5) * 20;
+			const targetRotateY = (Math.random() - 0.5) * 20;
+			const targetScale = 2.5 + Math.random() * 1.5; // Much larger scale (2.5x to 4x)
+
+			// Initialize element
 			gsap.set(el, {
 				transformOrigin: '50% 50%',
 				force3D: true,
@@ -177,15 +186,17 @@
 				opacity: 1
 			});
 
-			const { path, scales, rotations } = generateFullPath(el, centerX, centerY, index, elements.length);
-
 			return {
 				el,
-				fullPath: path,
-				scaleKeyframes: scales,
-				rotationKeyframes: rotations,
-				maxRotateX: (Math.random() - 0.5) * 15,
-				maxRotateY: (Math.random() - 0.5) * 15
+				startX: elCenterX,
+				startY: elCenterY,
+				targetX: target.x,
+				targetY: target.y,
+				path,
+				targetRotation,
+				targetRotateX,
+				targetRotateY,
+				targetScale
 			};
 		});
 
@@ -194,36 +205,204 @@
 		} else {
 			initFullAnimations();
 		}
+
+		hasInitialized = true;
 	}
 
 	function initReducedMotionAnimations() {
-		elementData.forEach(({ el, fullPath }) => {
-			const target = fullPath[Math.floor(fullPath.length / 2)] || { x: 0, y: 0 };
-			gsap.to(el, {
-				x: target.x * 0.5,
-				y: target.y * 0.5,
-				opacity: 0.6,
-				scrollTrigger: {
-					trigger: document.body,
-					start: 'top top',
-					end: 'bottom bottom',
-					scrub: 1
-				}
-			});
+		mainTimeline = gsap.timeline({ paused: true });
+
+		elementData.forEach(({ el, path }) => {
+			const endPoint = path[path.length - 1];
+			mainTimeline!.to(el, {
+				x: endPoint.x,
+				y: endPoint.y,
+				opacity: 0.7,
+				duration: 0.5,
+				ease: 'power2.out'
+			}, 0);
 		});
 	}
 
-	// Idle wind animation - uses xPercent/yPercent which don't conflict with motionPath's x/y
+	function initFullAnimations() {
+		mainTimeline = gsap.timeline({
+			paused: true,
+			onComplete: () => {
+				// Switch to absolute positioning so elements are fixed to the page
+				switchToAbsoluteMode();
+				// Start idle wind animation
+				initIdleWind();
+			},
+			onReverseComplete: () => {
+				// Reset all elements to initial state
+				resetElementsToInitial();
+			}
+		});
+
+		elementData.forEach(({ el, path, targetRotation, targetRotateX, targetRotateY, targetScale }, index) => {
+			const staggerDelay = index * 0.05;
+
+			mainTimeline!.to(el, {
+				motionPath: {
+					path: path,
+					curviness: pathCurviness,
+					autoRotate: false
+				},
+				rotation: targetRotation,
+				rotateX: targetRotateX,
+				rotateY: targetRotateY,
+				scale: targetScale,
+				opacity: 0.85,
+				duration: animationDuration,
+				ease: 'power2.inOut'
+			}, staggerDelay);
+		});
+
+		window.addEventListener('scroll', handleScroll, { passive: true });
+	}
+
+	function resetElementsToInitial() {
+		// Ensure we're in fixed mode
+		if (container) {
+			container.style.position = 'fixed';
+			container.style.top = '';
+			container.style.left = '';
+			container.style.width = '100vw';
+			container.style.height = '100vh';
+			container.style.transform = '';
+		}
+		if (svgContainer) {
+			svgContainer.style.position = 'absolute';
+			svgContainer.style.top = '50%';
+			svgContainer.style.left = '50%';
+			svgContainer.style.transform = `translate(-50%, -50%) scale(${logoScale})`;
+		}
+
+		// Reset all element transforms
+		elementData.forEach(({ el }) => {
+			gsap.set(el, {
+				x: 0,
+				y: 0,
+				xPercent: 0,
+				yPercent: 0,
+				rotation: 0,
+				rotateX: 0,
+				rotateY: 0,
+				scale: 1,
+				opacity: 1
+			});
+		});
+
+		isAbsoluteMode = false;
+	}
+
+	function switchToAbsoluteMode() {
+		if (isAbsoluteMode || !container) return;
+
+		// Calculate where each element should be in absolute page coordinates
+		elementData.forEach(({ el, targetX, targetY }) => {
+			// Set absolute position directly
+			gsap.set(el, {
+				x: targetX,
+				y: targetY
+			});
+		});
+
+		// Switch container to absolute positioning at page origin
+		container.style.position = 'absolute';
+		container.style.top = '0';
+		container.style.left = '0';
+		container.style.width = '100%';
+		container.style.height = `${pageHeight}px`;
+		container.style.transform = 'none';
+
+		// Update the wrapper to not be centered anymore
+		svgContainer.style.position = 'absolute';
+		svgContainer.style.top = '0';
+		svgContainer.style.left = '0';
+		svgContainer.style.transform = 'none';
+
+		isAbsoluteMode = true;
+	}
+
+	function handleScroll() {
+		const scrollY = window.scrollY;
+
+		if (scrollY > scrollThreshold && !isAnimatedOut) {
+			isAnimatedOut = true;
+			// Stop any idle wind animation
+			stopIdleWind();
+			// If we were in absolute mode, switch back to fixed for animation
+			if (isAbsoluteMode) {
+				prepareForAnimation();
+			}
+			// Play forward at normal speed
+			mainTimeline?.timeScale(1);
+			mainTimeline?.play();
+		} else if (scrollY <= scrollThreshold && isAnimatedOut) {
+			isAnimatedOut = false;
+			// Stop idle wind
+			stopIdleWind();
+			// If in absolute mode, prepare for reverse animation
+			if (isAbsoluteMode) {
+				prepareForAnimation();
+			}
+			// Reverse at faster speed
+			const reverseSpeed = animationDuration / reverseDuration;
+			mainTimeline?.timeScale(reverseSpeed);
+			mainTimeline?.reverse();
+		}
+	}
+
+	function prepareForAnimation() {
+		if (!isAbsoluteMode || !container) return;
+
+		// Reset container to fixed centered positioning
+		container.style.position = 'fixed';
+		container.style.top = '';
+		container.style.left = '';
+		container.style.width = '100vw';
+		container.style.height = '100vh';
+		container.style.transform = '';
+
+		// Reset wrapper to centered
+		svgContainer.style.position = 'absolute';
+		svgContainer.style.top = '50%';
+		svgContainer.style.left = '50%';
+		svgContainer.style.transform = `translate(-50%, -50%) scale(${logoScale})`;
+
+		// Set elements to their animated end positions (path offsets, not absolute positions)
+		elementData.forEach(({ el, path, targetRotation, targetRotateX, targetRotateY, targetScale }) => {
+			const endPoint = path[path.length - 1];
+			gsap.set(el, {
+				x: endPoint.x,
+				y: endPoint.y,
+				rotation: targetRotation,
+				rotateX: targetRotateX,
+				rotateY: targetRotateY,
+				scale: targetScale,
+				opacity: 0.85
+			});
+		});
+
+		isAbsoluteMode = false;
+	}
+
 	function initIdleWind() {
+		stopIdleWind();
+
 		elementData.forEach(({ el }) => {
 			const duration = 3 + Math.random() * 3;
-			const xAmp = (1.5 + Math.random() * 2) * windIntensity;
-			const yAmp = (1 + Math.random() * 1.5) * windIntensity;
+			const xAmp = (15 + Math.random() * 25) * windIntensity;
+			const yAmp = (10 + Math.random() * 20) * windIntensity;
 			const delay = Math.random() * 2;
 
-			// Floating X movement (xPercent is separate from x used by motionPath)
+			// Use actual pixel offsets since we're now in absolute mode
+			const currentX = gsap.getProperty(el, 'x') as number;
+			const currentY = gsap.getProperty(el, 'y') as number;
+
 			const tweenX = gsap.to(el, {
-				xPercent: xAmp,
+				x: currentX + xAmp,
 				duration: duration,
 				ease: 'sine.inOut',
 				yoyo: true,
@@ -231,97 +410,51 @@
 				delay: delay
 			});
 
-			// Floating Y movement (yPercent is separate from y used by motionPath)
 			const tweenY = gsap.to(el, {
-				yPercent: yAmp,
-				duration: duration * 1.3,
+				y: currentY + yAmp,
+				duration: duration * 1.2,
+				ease: 'sine.inOut',
+				yoyo: true,
+				repeat: -1,
+				delay: delay + 0.3
+			});
+
+			// Subtle 3D rotation wobble
+			const currentRotX = gsap.getProperty(el, 'rotateX') as number;
+			const currentRotY = gsap.getProperty(el, 'rotateY') as number;
+
+			const tweenRotX = gsap.to(el, {
+				rotateX: currentRotX + (2 + Math.random() * 3) * windIntensity,
+				duration: duration * 0.9,
 				ease: 'sine.inOut',
 				yoyo: true,
 				repeat: -1,
 				delay: delay + 0.5
 			});
 
-			idleTweens.push(tweenX, tweenY);
+			const tweenRotY = gsap.to(el, {
+				rotateY: currentRotY + (2 + Math.random() * 3) * windIntensity,
+				duration: duration * 1.1,
+				ease: 'sine.inOut',
+				yoyo: true,
+				repeat: -1,
+				delay: delay + 0.7
+			});
+
+			idleTweens.push(tweenX, tweenY, tweenRotX, tweenRotY);
 		});
 	}
 
-	function initFullAnimations() {
-		// Single unified timeline - no competing animations
-		mainTimeline = gsap.timeline({ paused: true });
-
-		elementData.forEach(({ el, fullPath, scaleKeyframes, rotationKeyframes, maxRotateX, maxRotateY }, index) => {
-			const staggerOffset = index * 0.008;
-			const elementTl = gsap.timeline();
-
-			// Path animation with wind baked in
-			elementTl.to(el, {
-				motionPath: {
-					path: fullPath,
-					curviness: pathCurviness,
-					autoRotate: false
-				},
-				rotateX: maxRotateX,
-				rotateY: maxRotateY,
-				opacity: 0.8,
-				duration: 1,
-				ease: 'none'
-			}, 0);
-
-			// Scale keyframes (includes wind bobbing)
-			const numScales = scaleKeyframes.length;
-			if (numScales > 1) {
-				const scaleTl = gsap.timeline();
-				for (let i = 1; i < numScales; i++) {
-					const duration = 1 / (numScales - 1);
-					scaleTl.to(el, {
-						scale: scaleKeyframes[i],
-						duration: duration,
-						ease: 'none' // Linear for smooth wind feel
-					}, (i - 1) * duration);
-				}
-				elementTl.add(scaleTl, 0);
-			}
-
-			// Rotation keyframes (includes wind wobble)
-			const numRotations = rotationKeyframes.length;
-			if (numRotations > 1) {
-				const rotTl = gsap.timeline();
-				for (let i = 1; i < numRotations; i++) {
-					const duration = 1 / (numRotations - 1);
-					rotTl.to(el, {
-						rotation: rotationKeyframes[i],
-						duration: duration,
-						ease: 'none'
-					}, (i - 1) * duration);
-				}
-				elementTl.add(rotTl, 0);
-			}
-
-			mainTimeline!.add(elementTl, staggerOffset);
-		});
-
-		// Single ScrollTrigger controls everything
-		scrollTriggerInstance = ScrollTrigger.create({
-			trigger: document.body,
-			start: 'top top',
-			end: 'bottom bottom',
-			scrub: 1.2 / animationSpeed,
-			onUpdate: (self) => {
-				if (mainTimeline) {
-					mainTimeline.progress(self.progress);
-				}
-			}
-		});
-
-		// Start idle wind animation (runs continuously, uses separate properties)
-		initIdleWind();
+	function stopIdleWind() {
+		idleTweens.forEach((tween) => tween.kill());
+		idleTweens = [];
 	}
 
 	function handleResize() {
-		viewportWidth = window.innerWidth;
-		viewportHeight = window.innerHeight;
-		pageHeight = document.documentElement.scrollHeight;
 		cleanup();
+		hasInitialized = false;
+		isAnimatedOut = false;
+		isAbsoluteMode = false;
 		requestAnimationFrame(() => {
 			initAnimations();
 		});
@@ -330,23 +463,33 @@
 	function cleanup() {
 		if (!browser) return;
 
-		if (scrollTriggerInstance) {
-			scrollTriggerInstance.kill();
-			scrollTriggerInstance = null;
-		}
+		window.removeEventListener('scroll', handleScroll);
+		window.removeEventListener('resize', handleResize);
 
 		if (mainTimeline) {
 			mainTimeline.kill();
 			mainTimeline = null;
 		}
 
-		// Kill all idle wind tweens
-		idleTweens.forEach((tween) => tween.kill());
-		idleTweens = [];
+		stopIdleWind();
+
+		// Reset to fixed mode
+		if (container) {
+			container.style.position = '';
+			container.style.top = '';
+			container.style.left = '';
+			container.style.width = '';
+			container.style.height = '';
+			container.style.transform = '';
+		}
+		if (svgContainer) {
+			svgContainer.style.position = '';
+			svgContainer.style.top = '';
+			svgContainer.style.left = '';
+			svgContainer.style.transform = '';
+		}
 
 		elementData = [];
-
-		window.removeEventListener('resize', handleResize);
 	}
 
 	onMount(() => {
@@ -362,6 +505,7 @@
 			mediaQuery.addEventListener('change', () => {
 				prefersReducedMotion = mediaQuery.matches;
 				cleanup();
+				hasInitialized = false;
 				initAnimations();
 			});
 		}
@@ -396,10 +540,9 @@
 		height: 100vh;
 		z-index: var(--z-index, -1);
 		pointer-events: none;
-		overflow: hidden;
+		overflow: visible;
 		perspective: var(--perspective, 1200px);
 		perspective-origin: 50% 50%;
-		contain: layout style;
 	}
 
 	.logo-animation-wrapper {

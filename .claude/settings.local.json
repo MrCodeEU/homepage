@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run check:*)",
+      "Bash(chmod:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(npx svelte-kit:*)"
     ]
   }
 }
