@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getCV, getProjects, getStravaStats, type CV, type Project, type StravaStats } from '$lib/api';
 	import { LogoAnimation } from '$lib/components';
-	import logoSvg from '$lib/assets/logo-placeholder.svg?raw';
+	import logoSvg from '$lib/assets/logo.svg?raw';
 
 	let cv: CV | null = null;
 	let projects: Project[] = [];
@@ -37,7 +37,7 @@
 	reverseDuration={0.5}
 	perspective={1200}
 	zIndex={-1}
-	logoScale={3}
+	logoSize={400}
 	scrollThreshold={15}
 	windIntensity={1}
 	pathCurviness={1.2}

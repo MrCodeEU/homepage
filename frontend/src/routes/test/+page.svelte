@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { LogoAnimation } from '$lib/components';
-	import logoSvg from '$lib/assets/logo-placeholder.svg?raw';
+	import logoSvg from '$lib/assets/logo.svg?raw';
 </script>
 
 <svelte:head>
@@ -14,7 +14,7 @@
 	reverseDuration={0.5}
 	perspective={1200}
 	zIndex={-1}
-	logoScale={3}
+	logoSize={400}
 	scrollThreshold={15}
 	windIntensity={1}
 	pathCurviness={1.2}
