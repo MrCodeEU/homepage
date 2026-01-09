@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getCV, getProjects, getStravaStats, type CV, type Project, type StravaStats } from '$lib/api';
+	import { getCV, getProjects, getStravaData, type CV, type Project, type StravaData } from '$lib/api';
 	import { LogoAnimation } from '$lib/components';
 	import logoSvg from '$lib/assets/logo.svg?raw';
 
 	let cv: CV | null = null;
 	let projects: Project[] = [];
-	let strava: StravaStats | null = null;
+	let strava: StravaData | null = null;
 	let loading = true;
 	let error: string | null = null;
 
@@ -15,7 +15,7 @@
 			[cv, projects, strava] = await Promise.all([
 				getCV(),
 				getProjects(),
-				getStravaStats()
+				getStravaData()
 			]);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load data';
@@ -139,25 +139,25 @@
 				<h3>Running Stats</h3>
 				<div class="stats-grid">
 					<div class="stat-card">
-						<p class="stat-value">{strava.total_activities}</p>
+						<p class="stat-value">{strava.total_stats.count}</p>
 						<p class="stat-label">Total Runs</p>
 					</div>
 					<div class="stat-card">
-						<p class="stat-value">{strava.total_distance.toFixed(1)} km</p>
+						<p class="stat-value">{(strava.total_stats.distance / 1000).toFixed(1)} km</p>
 						<p class="stat-label">Total Distance</p>
 					</div>
 					<div class="stat-card">
-						<p class="stat-value">{Math.floor(strava.total_time / 3600)}h</p>
+						<p class="stat-value">{Math.floor(strava.total_stats.moving_time / 3600)}h</p>
 						<p class="stat-label">Total Time</p>
 					</div>
 				</div>
 				<div class="recent-runs">
 					<h4>Recent Runs</h4>
-					{#each strava.recent_runs as run}
+					{#each strava.recent_activities as run}
 						<div class="run-item">
 							<p class="run-name">{run.name}</p>
 							<p class="run-details">
-								{run.distance.toFixed(1)} km • {Math.floor(run.moving_time / 60)} min • {run.date}
+								{(run.distance / 1000).toFixed(1)} km • {Math.floor(run.moving_time / 60)} min • {new Date(run.start_date).toLocaleDateString()}
 							</p>
 						</div>
 					{/each}
