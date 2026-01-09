@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getCV, getProjects, getStravaStats, type CV, type Project, type StravaStats } from '$lib/api';
+	import { LogoAnimation } from '$lib/components';
+	import logoSvg from '$lib/assets/logo-placeholder.svg?raw';
 
 	let cv: CV | null = null;
 	let projects: Project[] = [];
@@ -27,6 +29,17 @@
 <svelte:head>
 	<title>Personal Homepage</title>
 </svelte:head>
+
+<!-- Background Logo Animation -->
+<LogoAnimation
+	svgContent={logoSvg}
+	animationSpeed={1}
+	perspective={1200}
+	zIndex={-1}
+	logoScale={3}
+	edgePadding={150}
+	pathCurviness={0.4}
+/>
 
 <div class="container">
 	{#if loading}
@@ -455,5 +468,10 @@
 		.project-grid {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	/* Ensure enough scroll space for animation testing */
+	.container {
+		min-height: 200vh;
 	}
 </style>

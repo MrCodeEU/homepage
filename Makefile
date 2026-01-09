@@ -1,5 +1,6 @@
 .PHONY: help dev-frontend dev-backend build-docker run-docker clean install \
-	test test-frontend test-backend lint lint-frontend lint-backend format check-all
+	test test-frontend test-backend test-real test-real-backend test-real-frontend \
+	generate-data lint lint-frontend lint-backend format check-all
 
 help:
 	@echo "Homepage Development Commands:"
@@ -10,10 +11,14 @@ help:
 	@echo "  make dev-backend      - Run backend dev server (port 8080)"
 	@echo ""
 	@echo "Testing:"
-	@echo "  make test             - Run all tests (frontend + backend)"
-	@echo "  make test-frontend    - Run frontend tests"
-	@echo "  make test-backend     - Run backend tests"
+	@echo "  make test             - Run all tests with mocks (frontend + backend)"
+	@echo "  make test-frontend    - Run frontend tests with mocks"
+	@echo "  make test-backend     - Run backend tests with mocks"
+	@echo "  make test-real        - Run all tests against real APIs (requires credentials)"
 	@echo "  make test-watch       - Run frontend tests in watch mode"
+	@echo ""
+	@echo "Data Generation:"
+	@echo "  make generate-data    - Generate data from APIs (requires credentials)"
 	@echo ""
 	@echo "Linting & Formatting:"
 	@echo "  make lint             - Run all linters"
@@ -81,6 +86,31 @@ test-frontend:
 test-watch:
 	@echo "Running frontend tests in watch mode..."
 	cd frontend && npm run test:watch
+
+# Real API Testing
+test-real: test-real-backend test-real-frontend
+	@echo "✅ All real API tests passed"
+
+test-real-backend:
+	@echo "Running backend tests against real APIs..."
+	@echo "⚠️  This requires API credentials in environment variables"
+	cd backend && go test -v -race -tags=realapi ./...
+	@echo "✅ Backend real API tests passed"
+
+test-real-frontend:
+	@echo "Running frontend tests against real APIs..."
+	@echo "⚠️  This requires the backend server to be running with generated data"
+	cd frontend && npm run test -- --run
+	@echo "✅ Frontend real API tests passed"
+
+# Data Generation
+generate-data:
+	@echo "Generating data from APIs..."
+	@echo "⚠️  This requires API credentials in environment variables:"
+	@echo "    - GITHUB_TOKEN, GITHUB_USERNAME"
+	@echo "    - STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN"
+	cd backend && go run cmd/generate/main.go -output ./data/generated -verbose
+	@echo "✅ Data generation complete"
 
 # Linting
 lint: lint-backend lint-frontend

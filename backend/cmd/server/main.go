@@ -14,32 +14,24 @@ import (
 	"time"
 
 	"github.com/mrcodeeu/homepage/internal/config"
-	"github.com/mrcodeeu/homepage/internal/scrapers"
 	"github.com/mrcodeeu/homepage/internal/storage"
 )
 
 //go:embed all:static
 var staticFiles embed.FS
 
-// Global scrapers (initialized in main)
+// Global data loader (initialized in main)
 var (
-	githubScraper *scrapers.GitHubScraper
+	dataLoader *storage.DataLoader
 )
 
 func main() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Initialize cache
-	cache, err := storage.NewFileCache(cfg.CacheDir)
-	if err != nil {
-		log.Fatalf("Failed to create cache: %v", err)
-	}
-	log.Printf("Cache initialized at %s", cfg.CacheDir)
-
-	// Initialize GitHub scraper
-	githubScraper = scrapers.NewGitHubScraper(cfg.GitHubUsername, cfg.GitHubToken, cache)
-	log.Printf("GitHub scraper initialized for user: %s", cfg.GitHubUsername)
+	// Initialize data loader
+	dataLoader = storage.NewDataLoader("")
+	log.Printf("Data loader initialized")
 
 	// Create HTTP server
 	mux := http.NewServeMux()
@@ -145,57 +137,33 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CV endpoint (mock data for MVP)
+// CV endpoint - loads LinkedIn data
 func handleCV(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	cv := map[string]interface{}{
-		"name":    "Your Name",
-		"title":   "Software Engineer",
-		"summary": "Building awesome things with Go and Svelte",
-		"experience": []map[string]interface{}{
-			{
-				"title":       "Senior Developer",
-				"company":     "Tech Corp",
-				"location":    "Remote",
-				"start_date":  "2020-01",
-				"end_date":    "Present",
-				"description": "Leading development of cloud infrastructure",
-			},
-			{
-				"title":       "Developer",
-				"company":     "Startup Inc",
-				"location":    "Vienna, Austria",
-				"start_date":  "2018-01",
-				"end_date":    "2020-01",
-				"description": "Full-stack development with modern technologies",
-			},
-		},
-		"education": []map[string]interface{}{
-			{
-				"school":     "University Name",
-				"degree":     "Bachelor of Science",
-				"field":      "Computer Science",
-				"start_date": "2014",
-				"end_date":   "2018",
-			},
-		},
-		"skills": []string{"Go", "Svelte", "Kubernetes", "Docker", "Ansible"},
+
+	// Try to load LinkedIn data
+	linkedInData, err := dataLoader.LoadLinkedIn()
+	if err != nil {
+		log.Printf("Error loading LinkedIn data: %v", err)
+		http.Error(w, "Failed to load CV data", http.StatusInternalServerError)
+		return
 	}
-	if err := json.NewEncoder(w).Encode(cv); err != nil {
+
+	if err := json.NewEncoder(w).Encode(linkedInData); err != nil {
 		http.Error(w, "Failed to encode CV data", http.StatusInternalServerError)
 		log.Printf("Error encoding CV response: %v", err)
 	}
 }
 
-// Projects endpoint - uses GitHub scraper
+// Projects endpoint - loads GitHub data
 func handleProjects(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	// Get projects from GitHub scraper (uses cache if available)
-	projects, err := githubScraper.GetCached()
+	// Load GitHub projects data
+	projects, err := dataLoader.LoadGitHub()
 	if err != nil {
-		log.Printf("Error fetching projects: %v", err)
-		http.Error(w, "Failed to fetch projects", http.StatusInternalServerError)
+		log.Printf("Error loading GitHub data: %v", err)
+		http.Error(w, "Failed to load projects", http.StatusInternalServerError)
 		return
 	}
 
@@ -205,29 +173,19 @@ func handleProjects(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Strava endpoint (mock data for MVP)
+// Strava endpoint - loads Strava data
 func handleStrava(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	stats := map[string]interface{}{
-		"total_activities": 42,
-		"total_distance":   245.5,
-		"total_time":       36000,
-		"recent_runs": []map[string]interface{}{
-			{
-				"name":        "Morning Run",
-				"distance":    5.2,
-				"moving_time": 1800,
-				"date":        "2025-01-15",
-			},
-			{
-				"name":        "Evening Run",
-				"distance":    8.5,
-				"moving_time": 3000,
-				"date":        "2025-01-12",
-			},
-		},
+
+	// Load Strava data
+	stravaData, err := dataLoader.LoadStrava()
+	if err != nil {
+		log.Printf("Error loading Strava data: %v", err)
+		http.Error(w, "Failed to load Strava data", http.StatusInternalServerError)
+		return
 	}
-	if err := json.NewEncoder(w).Encode(stats); err != nil {
+
+	if err := json.NewEncoder(w).Encode(stravaData); err != nil {
 		http.Error(w, "Failed to encode Strava data", http.StatusInternalServerError)
 		log.Printf("Error encoding Strava response: %v", err)
 	}

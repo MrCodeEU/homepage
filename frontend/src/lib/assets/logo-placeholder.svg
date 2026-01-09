@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Placeholder logo with pill shapes -->
+  <!-- Horizontal pill - top -->
+  <rect x="40" y="30" width="80" height="24" rx="12" ry="12" fill="#3B82F6" class="logo-element"/>
+
+  <!-- Vertical pill - left -->
+  <rect x="30" y="60" width="24" height="60" rx="12" ry="12" fill="#8B5CF6" class="logo-element"/>
+
+  <!-- Diagonal pill - center -->
+  <rect x="70" y="70" width="60" height="20" rx="10" ry="10" fill="#EC4899" transform="rotate(45 100 80)" class="logo-element"/>
+
+  <!-- Horizontal pill - middle -->
+  <rect x="80" y="90" width="70" height="20" rx="10" ry="10" fill="#10B981" class="logo-element"/>
+
+  <!-- Vertical pill - right -->
+  <rect x="150" y="50" width="20" height="70" rx="10" ry="10" fill="#F59E0B" class="logo-element"/>
+
+  <!-- Small pill - bottom left -->
+  <rect x="50" y="140" width="40" height="16" rx="8" ry="8" fill="#EF4444" class="logo-element"/>
+
+  <!-- Medium pill - bottom center -->
+  <rect x="100" y="150" width="50" height="18" rx="9" ry="9" fill="#06B6D4" class="logo-element"/>
+
+  <!-- Diagonal pill - bottom right -->
+  <rect x="130" y="120" width="45" height="16" rx="8" ry="8" fill="#84CC16" transform="rotate(-30 152 128)" class="logo-element"/>
+</svg>
