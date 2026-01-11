@@ -663,7 +663,18 @@
 				delay: delay + 0.7
 			});
 
-			idleTweens.push(tweenX, tweenY, tweenRotX, tweenRotY);
+			// Add Z-axis rotation (left/right spin)
+			const currentRotZ = gsap.getProperty(wrapper, 'rotation') as number;
+			const tweenRotZ = gsap.to(wrapper, {
+				rotation: currentRotZ + (Math.random() - 0.5) * 8 * windIntensity,
+				duration: duration * 1.3,
+				ease: 'sine.inOut',
+				yoyo: true,
+				repeat: -1,
+				delay: delay + 0.2
+			});
+
+			idleTweens.push(tweenX, tweenY, tweenRotX, tweenRotY, tweenRotZ);
 		});
 	}
 
