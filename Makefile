@@ -48,7 +48,11 @@ dev-frontend:
 
 dev-backend:
 	@echo "Starting backend dev server on http://localhost:8080"
-	cd backend && go run cmd/server/main.go
+	@if [ -f .env ]; then \
+		set -a && . ./.env && set +a && cd backend && go run cmd/server/main.go; \
+	else \
+		cd backend && go run cmd/server/main.go; \
+	fi
 
 build-docker:
 	@echo "Building Docker image..."
@@ -94,7 +98,11 @@ test-real: test-real-backend test-real-frontend
 test-real-backend:
 	@echo "Running backend tests against real APIs..."
 	@echo "⚠️  This requires API credentials in environment variables"
-	cd backend && go test -v -race -tags=realapi ./...
+	@if [ -f .env ]; then \
+		set -a && . ./.env && set +a && cd backend && go test -v -race -tags=realapi ./...; \
+	else \
+		cd backend && go test -v -race -tags=realapi ./...; \
+	fi
 	@echo "✅ Backend real API tests passed"
 
 test-real-frontend:
@@ -109,7 +117,13 @@ generate-data:
 	@echo "⚠️  This requires API credentials in environment variables:"
 	@echo "    - GITHUB_TOKEN, GITHUB_USERNAME"
 	@echo "    - STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN"
-	cd backend && go run cmd/generate/main.go -output ./data/generated -verbose
+	@echo "    - LINKEDIN_EMAIL, LINKEDIN_PASSWORD, LINKEDIN_TOTP_SECRET"
+	@if [ -f .env ]; then \
+		echo "Loading environment from .env file..."; \
+		set -a && . ./.env && set +a && cd backend && go run cmd/generate/main.go -output ./data/generated -verbose; \
+	else \
+		cd backend && go run cmd/generate/main.go -output ./data/generated -verbose; \
+	fi
 	@echo "✅ Data generation complete"
 
 # Linting

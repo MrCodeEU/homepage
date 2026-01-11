@@ -9,3 +9,10 @@ build/
 # Generated data
 data/
 backend/data/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

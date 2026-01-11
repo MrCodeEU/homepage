@@ -33,11 +33,11 @@
 <!-- Background Logo Animation -->
 <LogoAnimation
 	svgContent={logoSvg}
-	animationDuration={2}
+	animationDuration={0.5}
 	reverseDuration={0.5}
 	perspective={1200}
 	zIndex={-1}
-	logoSize={400}
+	logoSize={800}
 	scrollThreshold={15}
 	windIntensity={1}
 	pathCurviness={1.2}

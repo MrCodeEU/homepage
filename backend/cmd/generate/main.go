@@ -149,12 +149,19 @@ func generateStrava(cfg *config.Config, cache storage.Cache, outputDir string) e
 }
 
 func generateLinkedIn(cfg *config.Config, cache storage.Cache, outputDir string) error {
-	// LinkedIn profile URL (hardcoded for now, could be env var)
-	profileURL := "https://at.linkedin.com/in/mrcodeeu"
+	if cfg.LinkedInEmail == "" || cfg.LinkedInPassword == "" {
+		return fmt.Errorf("LinkedIn credentials not set (need LINKEDIN_EMAIL and LINKEDIN_PASSWORD)")
+	}
 
 	log.Println("Generating LinkedIn data...")
 
-	scraper := scrapers.NewLinkedInScraper(profileURL, cache)
+	scraper := scrapers.NewLinkedInScraper(
+		cfg.LinkedInEmail,
+		cfg.LinkedInPassword,
+		cfg.LinkedInTOTPSecret,
+		cfg.LinkedInProfileURL,
+		cache,
+	)
 	data, err := scraper.Scrape()
 	if err != nil {
 		// For MVP, if scraping fails, create a placeholder

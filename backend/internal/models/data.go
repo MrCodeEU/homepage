@@ -83,6 +83,7 @@ type LinkedInProfile struct {
 type LinkedInExperience struct {
 	Title       string `json:"title"`
 	Company     string `json:"company"`
+	CompanyLogo string `json:"company_logo,omitempty"`
 	Location    string `json:"location"`
 	StartDate   string `json:"start_date"` // "YYYY-MM" format
 	EndDate     string `json:"end_date"`   // "YYYY-MM" or "Present"
@@ -93,6 +94,7 @@ type LinkedInExperience struct {
 // LinkedInEducation represents education
 type LinkedInEducation struct {
 	School      string `json:"school"`
+	SchoolLogo  string `json:"school_logo,omitempty"`
 	Degree      string `json:"degree"`
 	Field       string `json:"field"`
 	StartDate   string `json:"start_date"` // "YYYY" format

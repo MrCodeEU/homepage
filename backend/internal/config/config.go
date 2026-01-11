@@ -17,8 +17,10 @@ type Config struct {
 	StravaRefreshToken string
 
 	// LinkedIn
-	LinkedInAPIKey    string
-	LinkedInAPISecret string
+	LinkedInEmail      string
+	LinkedInPassword   string
+	LinkedInTOTPSecret string
+	LinkedInProfileURL string
 
 	// Cache settings
 	CacheDir      string
@@ -36,8 +38,10 @@ func Load() *Config {
 		StravaClientSecret: os.Getenv("STRAVA_CLIENT_SECRET"),
 		StravaRefreshToken: os.Getenv("STRAVA_REFRESH_TOKEN"),
 
-		LinkedInAPIKey:    os.Getenv("LINKEDIN_API_KEY"),
-		LinkedInAPISecret: os.Getenv("LINKEDIN_API_SECRET"),
+		LinkedInEmail:      os.Getenv("LINKEDIN_EMAIL"),
+		LinkedInPassword:   os.Getenv("LINKEDIN_PASSWORD"),
+		LinkedInTOTPSecret: os.Getenv("LINKEDIN_TOTP_SECRET"),
+		LinkedInProfileURL: getEnv("LINKEDIN_PROFILE_URL", "https://linkedin.com/in/mrcodeeu"),
 
 		CacheDir:      getEnv("CACHE_DIR", "./data/cache"),
 		CacheTTLHours: 24,
