@@ -702,17 +702,33 @@
 
 	onMount(() => {
 		if (browser) {
-			requestAnimationFrame(() => {
+			// Initial setup with delay to allow page content to load
+			const initWithDelay = () => {
 				requestAnimationFrame(() => {
-					initAnimations();
+					requestAnimationFrame(() => {
+						initAnimations();
 
-					// Handle page reload while scrolled
-					if (window.scrollY > scrollThreshold) {
-						isAnimatedOut = true;
-						mainTimeline?.play();
-					}
+						// Handle page reload while scrolled
+						if (window.scrollY > scrollThreshold) {
+							isAnimatedOut = true;
+							mainTimeline?.play();
+						}
+					});
 				});
-			});
+			};
+
+			initWithDelay();
+
+			// Re-initialize after content likely loaded to get correct page height
+			setTimeout(() => {
+				const newPageHeight = document.documentElement.scrollHeight;
+				if (newPageHeight !== pageHeight && newPageHeight > viewportHeight) {
+					cleanup();
+					hasInitialized = false;
+					initWithDelay();
+				}
+			}, 500);
+
 			window.addEventListener('resize', handleResize, { passive: true });
 
 			const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -743,12 +759,11 @@
 
 <style>
 	.logo-animation-container {
-		position: absolute;
+		position: fixed;
 		top: 0;
 		left: 0;
-		width: 100%;
-		height: 100%;
-		min-height: 100vh;
+		width: 100vw;
+		height: 100vh;
 		z-index: var(--z-index, -1);
 		pointer-events: none;
 		overflow: visible;
@@ -763,6 +778,7 @@
 		width: 100%;
 		height: 100%;
 		transform-style: preserve-3d;
+		overflow: visible;
 	}
 
 	.logo-animation-wrapper :global(.animated-element) {

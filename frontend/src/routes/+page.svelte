@@ -90,11 +90,11 @@
 <!-- Background Logo Animation -->
 <LogoAnimation
 	svgContent={logoSvg}
-	animationDuration={2}
-	reverseDuration={0.5}
+	animationDuration={0.8}
+	reverseDuration={0.3}
 	perspective={1200}
 	zIndex={-1}
-	logoSize={500}
+	logoSize={400}
 	scrollThreshold={15}
 	windIntensity={1}
 	pathCurviness={1.2}
@@ -427,10 +427,11 @@
 	.hero {
 		min-height: 100vh;
 		display: flex;
-		align-items: center;
+		align-items: flex-end;
 		justify-content: center;
 		text-align: center;
 		padding: 2rem;
+		padding-bottom: 10vh;
 	}
 
 	.hero-content {

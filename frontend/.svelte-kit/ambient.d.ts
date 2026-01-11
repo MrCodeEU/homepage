@@ -49,12 +49,11 @@ declare module '$env/static/private' {
 	export const LANGUAGE: string;
 	export const _P9K_TTY: string;
 	export const NODE: string;
-	export const MAKE_TERMOUT: string;
 	export const LC_ADDRESS: string;
 	export const DOTNET_ROOT: string;
 	export const GUESTFISH_OUTPUT: string;
-	export const QT_LOGGING_RULES: string;
 	export const LC_NAME: string;
+	export const QT_LOGGING_RULES: string;
 	export const SSH_AUTH_SOCK: string;
 	export const P9K_TTY: string;
 	export const MEMORY_PRESSURE_WRITE: string;
@@ -87,8 +86,8 @@ declare module '$env/static/private' {
 	export const OBS_VKCAPTURE_QUIET: string;
 	export const HOME: string;
 	export const SSH_ASKPASS: string;
-	export const LC_PAPER: string;
 	export const LANG: string;
+	export const LC_PAPER: string;
 	export const FNM_COREPACK_ENABLED: string;
 	export const LS_COLORS: string;
 	export const _JAVA_AWT_WM_NONREPARENTING: string;
@@ -107,7 +106,6 @@ declare module '$env/static/private' {
 	export const CHROME_DESKTOP: string;
 	export const STEAM_FRAME_FORCE_CLOSE: string;
 	export const KDE_SESSION_UID: string;
-	export const MFLAGS: string;
 	export const INFOPATH: string;
 	export const npm_lifecycle_script: string;
 	export const MOZ_GMP_PATH: string;
@@ -118,7 +116,6 @@ declare module '$env/static/private' {
 	export const CLAUDE_CODE_SSE_PORT: string;
 	export const npm_config_npm_version: string;
 	export const XDG_SESSION_CLASS: string;
-	export const MAKEFLAGS: string;
 	export const LC_IDENTIFICATION: string;
 	export const TERM: string;
 	export const npm_package_name: string;
@@ -128,8 +125,8 @@ declare module '$env/static/private' {
 	export const ZDOTDIR: string;
 	export const LESSOPEN: string;
 	export const USER: string;
+	export const GIT_PAGER: string;
 	export const OPENCV_LOG_LEVEL: string;
-	export const MAKE_TERMERR: string;
 	export const VSCODE_GIT_IPC_HANDLE: string;
 	export const HOMEBREW_CELLAR: string;
 	export const QT_WAYLAND_RECONNECT: string;
@@ -139,7 +136,6 @@ declare module '$env/static/private' {
 	export const SHLVL: string;
 	export const NVM_CD_FLAGS: string;
 	export const PAGER: string;
-	export const MAKELEVEL: string;
 	export const LC_TELEPHONE: string;
 	export const GUESTFISH_INIT: string;
 	export const HOMEBREW_REPOSITORY: string;
@@ -156,8 +152,8 @@ declare module '$env/static/private' {
 	export const FNM_RESOLVE_ENGINES: string;
 	export const export: string;
 	export const DEBUGINFOD_URLS: string;
-	export const DOCKER_HOST: string;
 	export const LC_TIME: string;
+	export const DOCKER_HOST: string;
 	export const npm_package_json: string;
 	export const DEBUGINFOD_IMA_CERT_PATH: string;
 	export const P9K_SSH: string;
@@ -173,8 +169,8 @@ declare module '$env/static/private' {
 	export const DBUS_SESSION_BUS_ADDRESS: string;
 	export const npm_config_global_prefix: string;
 	export const KDE_APPLICATIONS_AS_SCOPE: string;
-	export const NVM_BIN: string;
 	export const MAIL: string;
+	export const NVM_BIN: string;
 	export const FNM_DIR: string;
 	export const FNM_MULTISHELL_PATH: string;
 	export const npm_node_execpath: string;
@@ -235,12 +231,11 @@ declare module '$env/dynamic/private' {
 		LANGUAGE: string;
 		_P9K_TTY: string;
 		NODE: string;
-		MAKE_TERMOUT: string;
 		LC_ADDRESS: string;
 		DOTNET_ROOT: string;
 		GUESTFISH_OUTPUT: string;
-		QT_LOGGING_RULES: string;
 		LC_NAME: string;
+		QT_LOGGING_RULES: string;
 		SSH_AUTH_SOCK: string;
 		P9K_TTY: string;
 		MEMORY_PRESSURE_WRITE: string;
@@ -273,8 +268,8 @@ declare module '$env/dynamic/private' {
 		OBS_VKCAPTURE_QUIET: string;
 		HOME: string;
 		SSH_ASKPASS: string;
-		LC_PAPER: string;
 		LANG: string;
+		LC_PAPER: string;
 		FNM_COREPACK_ENABLED: string;
 		LS_COLORS: string;
 		_JAVA_AWT_WM_NONREPARENTING: string;
@@ -293,7 +288,6 @@ declare module '$env/dynamic/private' {
 		CHROME_DESKTOP: string;
 		STEAM_FRAME_FORCE_CLOSE: string;
 		KDE_SESSION_UID: string;
-		MFLAGS: string;
 		INFOPATH: string;
 		npm_lifecycle_script: string;
 		MOZ_GMP_PATH: string;
@@ -304,7 +298,6 @@ declare module '$env/dynamic/private' {
 		CLAUDE_CODE_SSE_PORT: string;
 		npm_config_npm_version: string;
 		XDG_SESSION_CLASS: string;
-		MAKEFLAGS: string;
 		LC_IDENTIFICATION: string;
 		TERM: string;
 		npm_package_name: string;
@@ -314,8 +307,8 @@ declare module '$env/dynamic/private' {
 		ZDOTDIR: string;
 		LESSOPEN: string;
 		USER: string;
+		GIT_PAGER: string;
 		OPENCV_LOG_LEVEL: string;
-		MAKE_TERMERR: string;
 		VSCODE_GIT_IPC_HANDLE: string;
 		HOMEBREW_CELLAR: string;
 		QT_WAYLAND_RECONNECT: string;
@@ -325,7 +318,6 @@ declare module '$env/dynamic/private' {
 		SHLVL: string;
 		NVM_CD_FLAGS: string;
 		PAGER: string;
-		MAKELEVEL: string;
 		LC_TELEPHONE: string;
 		GUESTFISH_INIT: string;
 		HOMEBREW_REPOSITORY: string;
@@ -342,8 +334,8 @@ declare module '$env/dynamic/private' {
 		FNM_RESOLVE_ENGINES: string;
 		export: string;
 		DEBUGINFOD_URLS: string;
-		DOCKER_HOST: string;
 		LC_TIME: string;
+		DOCKER_HOST: string;
 		npm_package_json: string;
 		DEBUGINFOD_IMA_CERT_PATH: string;
 		P9K_SSH: string;
@@ -359,8 +351,8 @@ declare module '$env/dynamic/private' {
 		DBUS_SESSION_BUS_ADDRESS: string;
 		npm_config_global_prefix: string;
 		KDE_APPLICATIONS_AS_SCOPE: string;
-		NVM_BIN: string;
 		MAIL: string;
+		NVM_BIN: string;
 		FNM_DIR: string;
 		FNM_MULTISHELL_PATH: string;
 		npm_node_execpath: string;
