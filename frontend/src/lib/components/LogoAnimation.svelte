@@ -751,6 +751,7 @@
 	bind:this={container}
 	style:--perspective="{perspective}px"
 	style:--z-index={zIndex}
+	style:--page-height="{pageHeight}px"
 >
 	<div class="logo-animation-wrapper" bind:this={svgContainer}>
 		<!-- Elements are created dynamically -->
@@ -759,16 +760,16 @@
 
 <style>
 	.logo-animation-container {
-		position: fixed;
+		position: absolute;
 		top: 0;
 		left: 0;
-		width: 100vw;
-		height: 100vh;
+		width: 100%;
+		height: var(--page-height, 100%);
 		z-index: var(--z-index, -1);
 		pointer-events: none;
 		overflow: visible;
 		perspective: var(--perspective, 1200px);
-		perspective-origin: 50% 50%;
+		perspective-origin: 50% 50vh;
 	}
 
 	.logo-animation-wrapper {

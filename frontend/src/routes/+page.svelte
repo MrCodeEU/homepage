@@ -40,6 +40,15 @@
 		return `${mins}:${secs.toString().padStart(2, '0')}/km`;
 	}
 
+	// Get display name (first and last name only)
+	function getDisplayName(fullName: string | undefined): string {
+		if (!fullName) return 'Michael Reinegger';
+		const parts = fullName.split(' ');
+		if (parts.length <= 2) return fullName;
+		// Return first and last name only
+		return `${parts[0]} ${parts[1]}`;
+	}
+
 	// Language color mapping for GitHub
 	function getLanguageColor(language: string): string {
 		const colors: Record<string, string> = {
@@ -119,7 +128,7 @@
 		<!-- Hero Section with Logo in center -->
 		<section class="hero">
 			<div class="hero-content">
-				<h1>{linkedIn?.profile.name || 'Michael Reinegger'}</h1>
+				<h1>{getDisplayName(linkedIn?.profile.name)}</h1>
 				<h2 class="headline">{linkedIn?.profile.headline || 'Software Engineer'}</h2>
 				<p class="location">📍 {linkedIn?.profile.location || ''}</p>
 				{#if linkedIn?.profile.summary}
@@ -427,11 +436,11 @@
 	.hero {
 		min-height: 100vh;
 		display: flex;
-		align-items: flex-end;
+		align-items: center;
 		justify-content: center;
 		text-align: center;
 		padding: 2rem;
-		padding-bottom: 10vh;
+		padding-top: 40vh;
 	}
 
 	.hero-content {
