@@ -105,8 +105,8 @@
 	zIndex={-1}
 	logoSize={400}
 	scrollThreshold={15}
-	windIntensity={1}
-	pathCurviness={1.2}
+	windIntensity={2.5}
+	pathCurviness={3}
 />
 
 <main class="page">
@@ -440,7 +440,7 @@
 		justify-content: center;
 		text-align: center;
 		padding: 2rem;
-		padding-top: 40vh;
+		padding-top: 30vh;
 	}
 
 	.hero-content {

@@ -31,6 +31,7 @@
 	let pageHeight = 0;
 	let isAnimatedOut = false;
 	let hasInitialized = false;
+	let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	interface ElementData {
 		wrapper: HTMLDivElement;
@@ -684,16 +685,29 @@
 	}
 
 	function handleResize() {
-		cleanup();
-		hasInitialized = false;
-		isAnimatedOut = false;
-		requestAnimationFrame(() => {
-			initAnimations();
-		});
+		// Debounce resize events
+		if (resizeTimeout) {
+			clearTimeout(resizeTimeout);
+		}
+		
+		resizeTimeout = setTimeout(() => {
+			cleanup();
+			hasInitialized = false;
+			isAnimatedOut = false;
+			requestAnimationFrame(() => {
+				initAnimations();
+			});
+		}, 150);
 	}
 
 	function cleanup() {
 		if (!browser) return;
+
+		// Clear resize timeout
+		if (resizeTimeout) {
+			clearTimeout(resizeTimeout);
+			resizeTimeout = null;
+		}
 
 		window.removeEventListener('scroll', handleScroll);
 		window.removeEventListener('resize', handleResize);
