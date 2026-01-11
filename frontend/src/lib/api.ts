@@ -19,6 +19,7 @@ export interface LinkedInProfile {
 export interface LinkedInExperience {
 	title: string;
 	company: string;
+	company_logo?: string;
 	location: string;
 	start_date: string;
 	end_date: string;
@@ -28,6 +29,7 @@ export interface LinkedInExperience {
 
 export interface LinkedInEducation {
 	school: string;
+	school_logo?: string;
 	degree: string;
 	field: string;
 	start_date: string;
