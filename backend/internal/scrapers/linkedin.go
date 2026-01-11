@@ -80,7 +80,7 @@ func (l *LinkedInScraper) Scrape() (any, error) {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", l.headless),
 		chromedp.Flag("disable-gpu", true),
-		chromedp.Flag("no-sandbox", true), // Required for GitHub Actions
+		chromedp.Flag("no-sandbox", true),            // Required for GitHub Actions
 		chromedp.Flag("disable-dev-shm-usage", true), // Required for Docker/CI
 		chromedp.Flag("disable-setuid-sandbox", true),
 		chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
@@ -784,7 +784,7 @@ func (l *LinkedInScraper) extractEducation(ctx context.Context, data *models.Lin
 			Description: raw.Description,
 		}
 		edu.StartDate, edu.EndDate = parseLinkedInDateRange(raw.DateRange)
-		
+
 		if edu.School != "" {
 			data.Education = append(data.Education, edu)
 			log.Printf("Extracted education: %s - %s (%s - %s)", edu.School, edu.Degree, edu.StartDate, edu.EndDate)
@@ -935,18 +935,18 @@ func parseDateRange(dateRange string) (startDate, endDate, duration string) {
 
 // germanMonthMap maps German month abbreviations to month numbers
 var germanMonthMap = map[string]string{
-	"jan":  "01", "jan.": "01",
-	"feb":  "02", "feb.": "02",
-	"mär":  "03", "mär.": "03", "mar": "03", "mar.": "03", "märz": "03",
-	"apr":  "04", "apr.": "04",
-	"mai":  "05",
-	"jun":  "06", "jun.": "06", "juni": "06",
-	"jul":  "07", "jul.": "07", "juli": "07",
-	"aug":  "08", "aug.": "08",
-	"sep":  "09", "sep.": "09", "sept": "09", "sept.": "09",
-	"okt":  "10", "okt.": "10", "oct": "10", "oct.": "10",
-	"nov":  "11", "nov.": "11",
-	"dez":  "12", "dez.": "12", "dec": "12", "dec.": "12",
+	"jan": "01", "jan.": "01",
+	"feb": "02", "feb.": "02",
+	"mär": "03", "mär.": "03", "mar": "03", "mar.": "03", "märz": "03",
+	"apr": "04", "apr.": "04",
+	"mai": "05",
+	"jun": "06", "jun.": "06", "juni": "06",
+	"jul": "07", "jul.": "07", "juli": "07",
+	"aug": "08", "aug.": "08",
+	"sep": "09", "sep.": "09", "sept": "09", "sept.": "09",
+	"okt": "10", "okt.": "10", "oct": "10", "oct.": "10",
+	"nov": "11", "nov.": "11",
+	"dez": "12", "dez.": "12", "dec": "12", "dec.": "12",
 }
 
 // englishMonthMap maps English month names to month numbers
@@ -955,7 +955,7 @@ var englishMonthMap = map[string]string{
 	"february": "02", "feb": "02",
 	"march": "03", "mar": "03",
 	"april": "04", "apr": "04",
-	"may": "05",
+	"may":  "05",
 	"june": "06", "jun": "06",
 	"july": "07", "jul": "07",
 	"august": "08", "aug": "08",
@@ -982,9 +982,9 @@ func parseLinkedInDateRange(dateRange string) (startDate, endDate string) {
 	// Normalize different dash types and split
 	dateRange = strings.ReplaceAll(dateRange, "–", "-") // en-dash
 	dateRange = strings.ReplaceAll(dateRange, "—", "-") // em-dash
-	
+
 	var startPart, endPart string
-	
+
 	// Split by dash
 	if idx := strings.Index(dateRange, "-"); idx != -1 {
 		startPart = strings.TrimSpace(dateRange[:idx])
@@ -995,7 +995,7 @@ func parseLinkedInDateRange(dateRange string) (startDate, endDate string) {
 
 	// Parse start date
 	startDate = parseLinkedInDate(startPart)
-	
+
 	// Parse end date
 	if endPart != "" {
 		endLower := strings.ToLower(endPart)
@@ -1025,14 +1025,14 @@ func parseLinkedInDate(dateStr string) string {
 
 	// Try to extract month
 	dateLower := strings.ToLower(dateStr)
-	
+
 	// Check German months
 	for monthName, monthNum := range germanMonthMap {
 		if strings.Contains(dateLower, monthName) {
 			return fmt.Sprintf("%s-%s", yearMatch, monthNum)
 		}
 	}
-	
+
 	// Check English months
 	for monthName, monthNum := range englishMonthMap {
 		if strings.Contains(dateLower, monthName) {

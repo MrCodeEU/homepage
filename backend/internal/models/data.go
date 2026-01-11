@@ -30,19 +30,19 @@ type StravaStats struct {
 
 // StravaActivity represents a single activity
 type StravaActivity struct {
-	ID            int64     `json:"id"`
-	Name          string    `json:"name"`
-	Distance      float64   `json:"distance"`       // meters
-	MovingTime    int       `json:"moving_time"`    // seconds
-	ElapsedTime   int       `json:"elapsed_time"`   // seconds
-	TotalElevationGain float64 `json:"total_elevation_gain"` // meters
-	Type          string    `json:"type"`
-	StartDate     time.Time `json:"start_date"`
-	AveragePace   float64   `json:"average_pace"`   // min/km
-	AverageSpeed  float64   `json:"average_speed"`  // m/s
-	MaxSpeed      float64   `json:"max_speed"`      // m/s
-	AverageHeartrate float64 `json:"average_heartrate,omitempty"`
-	MaxHeartrate  float64   `json:"max_heartrate,omitempty"`
+	ID                 int64     `json:"id"`
+	Name               string    `json:"name"`
+	Distance           float64   `json:"distance"`             // meters
+	MovingTime         int       `json:"moving_time"`          // seconds
+	ElapsedTime        int       `json:"elapsed_time"`         // seconds
+	TotalElevationGain float64   `json:"total_elevation_gain"` // meters
+	Type               string    `json:"type"`
+	StartDate          time.Time `json:"start_date"`
+	AveragePace        float64   `json:"average_pace"`  // min/km
+	AverageSpeed       float64   `json:"average_speed"` // m/s
+	MaxSpeed           float64   `json:"max_speed"`     // m/s
+	AverageHeartrate   float64   `json:"average_heartrate,omitempty"`
+	MaxHeartrate       float64   `json:"max_heartrate,omitempty"`
 }
 
 // StravaBestRecords contains best/longest activities
@@ -55,8 +55,8 @@ type StravaBestRecords struct {
 
 // StravaRecord represents a personal record
 type StravaRecord struct {
-	Type     string         `json:"type"` // "5k", "10k", "half_marathon", "marathon", etc.
-	Time     int            `json:"time"` // seconds
+	Type     string         `json:"type"`     // "5k", "10k", "half_marathon", "marathon", etc.
+	Time     int            `json:"time"`     // seconds
 	Distance float64        `json:"distance"` // meters
 	Date     time.Time      `json:"date"`
 	Activity StravaActivity `json:"activity"`
@@ -64,10 +64,10 @@ type StravaRecord struct {
 
 // LinkedInData contains LinkedIn profile data
 type LinkedInData struct {
-	Profile    LinkedInProfile    `json:"profile"`
+	Profile    LinkedInProfile      `json:"profile"`
 	Experience []LinkedInExperience `json:"experience"`
 	Education  []LinkedInEducation  `json:"education"`
-	Skills     []string           `json:"skills"`
+	Skills     []string             `json:"skills"`
 }
 
 // LinkedInProfile contains basic profile information
