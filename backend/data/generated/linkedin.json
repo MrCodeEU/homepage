@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-01-12T21:27:58.931970082Z",
+  "source": "linkedin",
+  "version": "1.0.0",
+  "data": {
+    "profile": {
+      "name": "Michael Reinegger geb. Ludwig Josef",
+      "headline": "JKU Computer Science Master",
+      "location": "Kronstorf, Oberösterreich, Österreich",
+      "summary": ""
+    },
+    "experience": [
+      {
+        "title": "Softwareentwickler Masterarbeit",
+        "company": "Dynatrace",
+        "company_logo": "https://media.licdn.com/dms/image/v2/D4E0BAQEXe5JlggGfqQ/company-logo_100_100/company-logo_100_100/0/1688565737458/dynatrace_logo?e=1769644800\u0026v=beta\u0026t=EdizJQXinUXnTyEvNcinMzoEDrvlfd7wH8SxhxWCMNM",
+        "location": "Linz (Stadt), Oberösterreich, Österreich",
+        "start_date": "2025-11",
+        "end_date": "Present",
+        "description": "",
+        "duration": "3 Monate"
+      },
+      {
+        "title": "Tutor Digitale Schaltungen",
+        "company": "Johannes Kepler Universität Linz",
+        "company_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQHxCNDTcoewqw/company-logo_100_100/company-logo_100_100/0/1631308678749?e=1769644800\u0026v=beta\u0026t=2aoKzCXzj3FPI3IVC1pJW_99Lt9OSjNg5JA9-c6o_ek",
+        "location": "",
+        "start_date": "2025-10",
+        "end_date": "Present",
+        "description": "",
+        "duration": "4 Monate"
+      },
+      {
+        "title": "Praktikant",
+        "company": "Dynatrace",
+        "company_logo": "https://media.licdn.com/dms/image/v2/D4E0BAQEXe5JlggGfqQ/company-logo_100_100/company-logo_100_100/0/1688565737458/dynatrace_logo?e=1769644800\u0026v=beta\u0026t=EdizJQXinUXnTyEvNcinMzoEDrvlfd7wH8SxhxWCMNM",
+        "location": "Linz (Stadt), Oberösterreich, Österreich",
+        "start_date": "2025-08",
+        "end_date": "2025-09",
+        "description": "",
+        "duration": "2 Monate"
+      },
+      {
+        "title": "Studentischer Mitarbeiter",
+        "company": "Johannes Kepler Universität Linz",
+        "company_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQHxCNDTcoewqw/company-logo_100_100/company-logo_100_100/0/1631308678749?e=1769644800\u0026v=beta\u0026t=2aoKzCXzj3FPI3IVC1pJW_99Lt9OSjNg5JA9-c6o_ek",
+        "location": "",
+        "start_date": "2024-10",
+        "end_date": "2025-06",
+        "description": "",
+        "duration": "9 Monate"
+      },
+      {
+        "title": "Praktikant",
+        "company": "ventopay gmbh",
+        "company_logo": "https://media.licdn.com/dms/image/v2/D4D0BAQEoqsqAohvDAw/company-logo_100_100/company-logo_100_100/0/1687176756749/ventopay_gmbh_logo?e=1769644800\u0026v=beta\u0026t=3Pdovw3TSMoyiCFU9RpyUcbe1si11tYrdaGr-5q_pFE",
+        "location": "",
+        "start_date": "2024-07",
+        "end_date": "2024-07",
+        "description": "",
+        "duration": "1 Monat"
+      }
+    ],
+    "education": [
+      {
+        "school": "Johannes Kepler Universität Linz",
+        "school_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQHxCNDTcoewqw/company-logo_100_100/company-logo_100_100/0/1631308678749?e=1769644800\u0026v=beta\u0026t=2aoKzCXzj3FPI3IVC1pJW_99Lt9OSjNg5JA9-c6o_ek",
+        "degree": "Diplom-Ingenieur",
+        "field": "Computer Science: Networks and IT Security",
+        "start_date": "2024-10",
+        "end_date": "2026-06"
+      },
+      {
+        "school": "Johannes Kepler Universität Linz",
+        "school_logo": "https://media.licdn.com/dms/image/v2/C4E0BAQHxCNDTcoewqw/company-logo_100_100/company-logo_100_100/0/1631308678749?e=1769644800\u0026v=beta\u0026t=2aoKzCXzj3FPI3IVC1pJW_99Lt9OSjNg5JA9-c6o_ek",
+        "degree": "Bachelor",
+        "field": "Informatik",
+        "start_date": "2021-10",
+        "end_date": "2024-07"
+      }
+    ],
+    "skills": [
+      "IT-Infrastruktur",
+      "IT-Management"
+    ]
+  }
+}
