@@ -69,6 +69,7 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=backend-builder /build/backend/homepage .
+COPY --from=backend-builder /build/backend/data ./data
 
 # Create cache directory
 RUN mkdir -p /data/cache

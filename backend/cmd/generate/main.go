@@ -122,7 +122,8 @@ func generateGitHub(cfg *config.Config, cache storage.Cache, outputDir string) e
 
 func generateStrava(cfg *config.Config, cache storage.Cache, outputDir string) error {
 	if cfg.StravaClientID == "" || cfg.StravaClientSecret == "" || cfg.StravaRefreshToken == "" {
-		return fmt.Errorf("Strava credentials not set (need STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)")
+		log.Println("Skipping Strava generation: credentials not set (need STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)")
+		return nil
 	}
 
 	log.Println("Generating Strava data...")

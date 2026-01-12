@@ -16,3 +16,7 @@ backend/data/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# SvelteKit
+.svelte-kit/
+backend/cmd/server/static/.claude/
