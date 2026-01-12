@@ -105,38 +105,50 @@
 	zIndex={-1}
 	logoSize={400}
 	scrollThreshold={15}
-	windIntensity={1}
-	pathCurviness={1.2}
+	windIntensity={2.5}
+	pathCurviness={3}
 />
 
-<main class="page">
+<main class="relative z-10">
 	{#if loading}
-		<section class="hero">
-			<div class="loading">
+		<section class="hero min-h-screen flex items-center justify-center text-center p-8 pt-[30vh]">
+			<div class="flex flex-col items-center justify-center gap-4">
 				<div class="spinner"></div>
-				<p>Loading...</p>
+				<p class="text-detroit-text-muted">Loading...</p>
 			</div>
 		</section>
 	{:else if error}
-		<section class="hero">
-			<div class="error-container">
-				<h2>Error</h2>
-				<p>{error}</p>
+		<section class="hero min-h-screen flex items-center justify-center text-center p-8 pt-[30vh]">
+			<div class="error-container detroit-clip-md">
+				<h2 class="text-detroit-accent uppercase tracking-[0.2em] font-light mb-4">Error</h2>
+				<p class="text-detroit-text-muted">{error}</p>
 			</div>
 		</section>
 	{:else}
 		<!-- Hero Section with Logo in center -->
-		<section class="hero">
-			<div class="hero-content">
-				<h1>{getDisplayName(linkedIn?.profile.name)}</h1>
-				<h2 class="headline">{linkedIn?.profile.headline || 'Software Engineer'}</h2>
-				<p class="location">📍 {linkedIn?.profile.location || ''}</p>
+		<section class="hero min-h-screen flex items-center justify-center text-center p-8 pt-[30vh] relative overflow-hidden">
+			<!-- Decorative triangles -->
+			<div class="detroit-triangle-up absolute top-[10%] right-[5%] w-[200px] h-[200px] detroit-animate-float"></div>
+			<div class="detroit-triangle-down absolute bottom-[15%] left-[5%] w-[150px] h-[150px] detroit-animate-float" style="animation-direction: reverse; animation-duration: 8s;"></div>
+
+			<div class="hero-content max-w-[800px] relative z-10 p-12 bg-detroit-bg-card backdrop-blur-[10px] detroit-clip-lg border border-detroit-border-primary">
+				<h1 class="detroit-text-gradient-primary text-[clamp(2.5rem,8vw,4.5rem)] mb-3 leading-[1.1] font-extralight tracking-[0.1em] uppercase">
+					{getDisplayName(linkedIn?.profile.name)}
+				</h1>
+				<h2 class="text-[clamp(0.9rem,2.5vw,1.2rem)] text-white/55 font-light mb-6 tracking-[0.15em] uppercase">
+					{linkedIn?.profile.headline || 'Software Engineer'}
+				</h2>
+				<p class="text-detroit-primary/70 text-sm mb-6 tracking-[0.08em]">
+					{linkedIn?.profile.location || ''}
+				</p>
 				{#if linkedIn?.profile.summary}
-					<p class="summary">{linkedIn.profile.summary}</p>
+					<p class="text-detroit-text-muted text-[0.95rem] leading-[1.9] mb-10 font-light">
+						{linkedIn.profile.summary}
+					</p>
 				{/if}
-				<div class="scroll-indicator">
-					<span>Scroll to explore</span>
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<div class="scroll-indicator flex flex-col items-center gap-3 text-detroit-primary/60">
+					<span class="text-[0.7rem] uppercase tracking-[0.25em]">Scroll to explore</span>
+					<svg class="opacity-60" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<path d="M12 5v14M5 12l7 7 7-7"/>
 					</svg>
 				</div>
@@ -145,11 +157,11 @@
 
 		<!-- Skills Section -->
 		{#if linkedIn?.skills && linkedIn.skills.length > 0}
-			<section class="section skills-section">
-				<h2 class="section-title">Skills</h2>
-				<div class="skills-grid">
+			<section class="section py-24 px-8 max-w-[1200px] mx-auto relative detroit-divider">
+				<h2 class="detroit-title text-[clamp(2rem,5vw,3rem)] mb-14 text-white/95 font-extralight tracking-[0.2em] uppercase">Skills</h2>
+				<div class="flex flex-wrap gap-4">
 					{#each linkedIn.skills as skill}
-						<span class="skill-tag">{skill}</span>
+						<span class="detroit-tag py-[0.7rem] px-7 text-xs uppercase tracking-[0.1em] font-normal">{skill}</span>
 					{/each}
 				</div>
 			</section>
@@ -157,37 +169,40 @@
 
 		<!-- Experience Section -->
 		{#if linkedIn?.experience && linkedIn.experience.length > 0}
-			<section class="section experience-section">
-				<h2 class="section-title">Experience</h2>
-				<div class="timeline">
+			<section class="section py-24 px-8 max-w-[1200px] mx-auto relative detroit-divider">
+				<h2 class="detroit-title text-[clamp(2rem,5vw,3rem)] mb-14 text-white/95 font-extralight tracking-[0.2em] uppercase">Experience</h2>
+				<div class="detroit-timeline">
 					{#each linkedIn.experience as exp}
-						<article class="timeline-item">
-							<div class="timeline-marker"></div>
-							<div class="timeline-content">
-								<div class="timeline-header">
+						<article class="timeline-item relative mb-12">
+							<div class="detroit-timeline-marker top-6"></div>
+							<div class="timeline-content detroit-card detroit-clip-md detroit-corners-md p-8">
+								<!-- Corner accent borders -->
+								<span class="corner-tr"></span>
+								<span class="corner-bl"></span>
+								<div class="flex gap-6 items-start max-md:flex-col max-md:gap-4">
 									{#if exp.company_logo}
-										<img src={exp.company_logo} alt={exp.company} class="company-logo" />
+										<img src={exp.company_logo} alt={exp.company} class="company-logo w-[55px] h-[55px] detroit-clip-xs object-cover shrink-0" />
 									{:else}
-										<div class="company-logo-placeholder">
+										<div class="company-logo-placeholder w-[55px] h-[55px] detroit-clip-xs flex items-center justify-center font-normal text-xl text-detroit-primary shrink-0 border border-detroit-primary/30">
 											{exp.company ? exp.company.charAt(0) : '?'}
 										</div>
 									{/if}
-									<div class="timeline-info">
-										<h3>{exp.title}</h3>
-										<p class="company">{exp.company}</p>
-										<p class="meta">
-											<span class="date">{formatDate(exp.start_date)} - {formatDate(exp.end_date)}</span>
+									<div>
+										<h3 class="mb-1 text-white/95 text-lg font-normal tracking-[0.04em]">{exp.title}</h3>
+										<p class="text-detroit-primary mb-1 font-normal text-[0.95rem]">{exp.company}</p>
+										<p class="text-white/40 text-sm tracking-[0.06em]">
+											<span>{formatDate(exp.start_date)} - {formatDate(exp.end_date)}</span>
 											{#if exp.duration}
-												<span class="duration">· {exp.duration}</span>
+												<span class="ml-1">· {exp.duration}</span>
 											{/if}
 										</p>
 										{#if exp.location}
-											<p class="location-small">📍 {exp.location}</p>
+											<p class="text-detroit-primary/50 text-xs mt-1">{exp.location}</p>
 										{/if}
 									</div>
 								</div>
 								{#if exp.description}
-									<p class="description">{exp.description}</p>
+									<p class="text-white/50 mt-6 leading-[1.8] text-sm">{exp.description}</p>
 								{/if}
 							</div>
 						</article>
@@ -198,27 +213,30 @@
 
 		<!-- Education Section -->
 		{#if linkedIn?.education && linkedIn.education.length > 0}
-			<section class="section education-section">
-				<h2 class="section-title">Education</h2>
-				<div class="education-grid">
+			<section class="section py-24 px-8 max-w-[1200px] mx-auto relative detroit-divider">
+				<h2 class="detroit-title text-[clamp(2rem,5vw,3rem)] mb-14 text-white/95 font-extralight tracking-[0.2em] uppercase">Education</h2>
+				<div class="grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-8 max-md:grid-cols-1">
 					{#each linkedIn.education as edu}
-						<article class="education-card">
-							<div class="education-header">
+						<article class="detroit-card-secondary detroit-clip-md detroit-corners-md detroit-corners-md-secondary p-8 education-card">
+							<!-- Corner accent borders -->
+							<span class="corner-tr"></span>
+							<span class="corner-bl"></span>
+							<div class="flex gap-6 items-start">
 								{#if edu.school_logo}
-									<img src={edu.school_logo} alt={edu.school} class="school-logo" />
+									<img src={edu.school_logo} alt={edu.school} class="w-[55px] h-[55px] detroit-clip-xs object-cover shrink-0" />
 								{:else}
-									<div class="school-logo-placeholder">
+									<div class="w-[55px] h-[55px] detroit-clip-xs flex items-center justify-center font-normal text-xl text-detroit-secondary shrink-0 border border-detroit-secondary/30 bg-gradient-to-br from-detroit-secondary/20 to-detroit-accent/20">
 										{edu.school ? edu.school.charAt(0) : '?'}
 									</div>
 								{/if}
-								<div class="education-info">
-									<h3>{edu.school}</h3>
-									<p class="degree">{edu.degree}{edu.field ? `, ${edu.field}` : ''}</p>
-									<p class="date">{formatDate(edu.start_date)} - {formatDate(edu.end_date)}</p>
+								<div>
+									<h3 class="mb-1 text-white/95 text-lg font-normal">{edu.school}</h3>
+									<p class="text-detroit-secondary mb-1 font-normal text-[0.95rem]">{edu.degree}{edu.field ? `, ${edu.field}` : ''}</p>
+									<p class="text-white/40 text-sm">{formatDate(edu.start_date)} - {formatDate(edu.end_date)}</p>
 								</div>
 							</div>
 							{#if edu.description}
-								<p class="description">{edu.description}</p>
+								<p class="text-white/50 mt-6 leading-[1.8] text-sm">{edu.description}</p>
 							{/if}
 						</article>
 					{/each}
@@ -228,17 +246,20 @@
 
 		<!-- Projects Section -->
 		{#if projects && projects.length > 0}
-			<section class="section projects-section">
-				<h2 class="section-title">Projects</h2>
-				<div class="projects-grid">
+			<section class="section py-24 px-8 max-w-[1200px] mx-auto relative detroit-divider">
+				<h2 class="detroit-title text-[clamp(2rem,5vw,3rem)] mb-14 text-white/95 font-extralight tracking-[0.2em] uppercase">Projects</h2>
+				<div class="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-8 max-md:grid-cols-1">
 					{#each projects as project, idx}
-						<article class="project-card">
+						<article class="detroit-card detroit-clip-lg detroit-border-frame detroit-corners-lg flex flex-col">
+							<!-- Corner accent borders -->
+							<span class="corner-tr"></span>
+							<span class="corner-bl"></span>
 							{#if project.images && project.images.length > 0}
-								<div class="project-image-container">
+								<div class="project-image-container relative h-[200px] overflow-hidden detroit-clip-lg">
 									<img
 										src={project.images[0]}
 										alt={project.name}
-										class="project-image"
+										class="w-full h-full object-cover transition-all duration-600 saturate-[0.7] brightness-[0.9] hover:scale-110 hover:saturate-100 hover:brightness-100"
 										on:error={(e) => {
 											const target = e.currentTarget;
 											if (target instanceof HTMLImageElement) {
@@ -247,36 +268,36 @@
 										}}
 									/>
 									{#if project.featured}
-										<span class="featured-badge">Featured</span>
+										<span class="detroit-badge absolute top-5 left-0 py-2 px-7 pl-5 text-[0.6rem] font-medium uppercase tracking-[0.2em] z-10">Featured</span>
 									{/if}
 								</div>
 							{:else}
-								<div class="project-image-placeholder" style="background: linear-gradient(135deg, hsl({idx * 45}, 70%, 60%), hsl({idx * 45 + 40}, 70%, 50%));">
+								<div class="h-[200px] relative detroit-clip-lg" style="background: linear-gradient(135deg, hsl({idx * 45}, 70%, 60%), hsl({idx * 45 + 40}, 70%, 50%));">
 									{#if project.featured}
-										<span class="featured-badge">Featured</span>
+										<span class="detroit-badge absolute top-5 left-0 py-2 px-7 pl-5 text-[0.6rem] font-medium uppercase tracking-[0.2em] z-10">Featured</span>
 									{/if}
 								</div>
 							{/if}
-							<div class="project-content">
-								<h3>
-									<a href={project.url} target="_blank" rel="noopener noreferrer">
+							<div class="p-8 flex-1 flex flex-col">
+								<h3 class="mb-4">
+									<a href={project.url} target="_blank" rel="noopener noreferrer" class="text-white/95 no-underline transition-colors duration-300 font-normal tracking-[0.04em] text-lg hover:text-detroit-primary">
 										{project.name}
 									</a>
 								</h3>
-								<p class="description">{project.description || 'No description available'}</p>
-								<div class="project-meta">
+								<p class="text-detroit-text-muted text-sm leading-[1.8] flex-1 mb-6">{project.description || 'No description available'}</p>
+								<div class="flex justify-between items-center text-sm text-white/40 mb-4 pt-4 border-t border-detroit-border-primary">
 									{#if project.language}
-										<span class="language">
-											<span class="language-dot" style="background: {getLanguageColor(project.language)}"></span>
+										<span class="flex items-center gap-2">
+											<span class="w-2.5 h-2.5 detroit-clip-diamond" style="background: {getLanguageColor(project.language)}"></span>
 											{project.language}
 										</span>
 									{/if}
-									<span class="stars">⭐ {project.stars}</span>
+									<span>{project.stars}</span>
 								</div>
 								{#if project.topics && project.topics.length > 0}
-									<div class="topics">
+									<div class="flex flex-wrap gap-2">
 										{#each project.topics.slice(0, 4) as topic}
-											<span class="topic-tag">{topic}</span>
+											<span class="detroit-tag-secondary py-1 px-4 text-[0.6rem] uppercase tracking-[0.08em]">{topic}</span>
 										{/each}
 									</div>
 								{/if}
@@ -289,54 +310,54 @@
 
 		<!-- Strava Section -->
 		{#if strava}
-			<section class="section strava-section">
-				<h2 class="section-title">🏃 Running Stats</h2>
-				
+			<section class="strava-section detroit-clip-oct py-24 px-8 max-w-[1200px] mx-auto my-12 bg-detroit-bg-card-light backdrop-blur-[20px] border border-strava/10 relative">
+				<h2 class="detroit-title text-[clamp(2rem,5vw,3rem)] mb-14 text-white/95 font-extralight tracking-[0.2em] uppercase">Running Stats</h2>
+
 				<!-- Stats Overview -->
-				<div class="stats-grid">
-					<div class="stat-card">
-						<div class="stat-icon">🏃</div>
-						<p class="stat-value">{strava.total_stats.count}</p>
-						<p class="stat-label">Total Runs</p>
+				<div class="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-5 mb-10">
+					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+						<div class="text-2xl mb-2 opacity-80"></div>
+						<p class="text-3xl font-light text-strava m-0 tracking-tight">{strava.total_stats.count}</p>
+						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Total Runs</p>
 					</div>
-					<div class="stat-card">
-						<div class="stat-icon">📏</div>
-						<p class="stat-value">{formatDistance(strava.total_stats.distance)} km</p>
-						<p class="stat-label">Total Distance</p>
+					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+						<div class="text-2xl mb-2 opacity-80"></div>
+						<p class="text-3xl font-light text-strava m-0 tracking-tight">{formatDistance(strava.total_stats.distance)} km</p>
+						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Total Distance</p>
 					</div>
-					<div class="stat-card">
-						<div class="stat-icon">⏱️</div>
-						<p class="stat-value">{formatTime(strava.total_stats.moving_time)}</p>
-						<p class="stat-label">Total Time</p>
+					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+						<div class="text-2xl mb-2 opacity-80"></div>
+						<p class="text-3xl font-light text-strava m-0 tracking-tight">{formatTime(strava.total_stats.moving_time)}</p>
+						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Total Time</p>
 					</div>
-					<div class="stat-card">
-						<div class="stat-icon">⛰️</div>
-						<p class="stat-value">{Math.round(strava.total_stats.elevation_gain)} m</p>
-						<p class="stat-label">Elevation Gain</p>
+					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+						<div class="text-2xl mb-2 opacity-80"></div>
+						<p class="text-3xl font-light text-strava m-0 tracking-tight">{Math.round(strava.total_stats.elevation_gain)} m</p>
+						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Elevation Gain</p>
 					</div>
 				</div>
 
 				<!-- Year to Date Stats -->
-				<div class="ytd-section">
-					<h3>Year to Date</h3>
-					<div class="ytd-stats">
+				<div class="text-center mb-10 py-7 bg-strava/5 detroit-clip-hex">
+					<h3 class="text-white/80 mb-3 text-sm font-normal uppercase tracking-[0.2em]">Year to Date</h3>
+					<div class="flex justify-center gap-8 text-white/50 text-sm flex-wrap">
 						<span>{strava.year_to_date_stats.count} runs</span>
-						<span>•</span>
+						<span class="w-1.5 h-1.5 bg-strava/60 detroit-clip-diamond self-center"></span>
 						<span>{formatDistance(strava.year_to_date_stats.distance)} km</span>
-						<span>•</span>
+						<span class="w-1.5 h-1.5 bg-strava/60 detroit-clip-diamond self-center"></span>
 						<span>{formatTime(strava.year_to_date_stats.moving_time)}</span>
 					</div>
 				</div>
 
 				<!-- Personal Records -->
 				{#if strava.personal_records && strava.personal_records.length > 0}
-					<div class="records-section">
-						<h3>Personal Records</h3>
-						<div class="records-grid">
+					<div class="mb-10">
+						<h3 class="text-white/80 mb-5 text-sm font-normal uppercase tracking-[0.12em]">Personal Records</h3>
+						<div class="flex flex-wrap gap-4">
 							{#each strava.personal_records as record}
-								<div class="record-card">
-									<span class="record-type">{record.type}</span>
-									<span class="record-time">{formatTime(record.time)}</span>
+								<div class="bg-white/[0.02] py-4 px-8 border border-strava/10 detroit-clip-skew flex flex-col items-center gap-1 transition-all duration-300 hover:bg-strava/5 hover:translate-x-1">
+									<span class="text-white/40 text-[0.65rem] uppercase tracking-[0.12em]">{record.type}</span>
+									<span class="text-strava font-normal text-lg">{formatTime(record.time)}</span>
 								</div>
 							{/each}
 						</div>
@@ -345,19 +366,19 @@
 
 				<!-- Recent Activities -->
 				{#if strava.recent_activities && strava.recent_activities.length > 0}
-					<div class="recent-section">
-						<h3>Recent Runs</h3>
-						<div class="activities-list">
+					<div>
+						<h3 class="text-white/80 mb-5 text-sm font-normal uppercase tracking-[0.12em]">Recent Runs</h3>
+						<div class="flex flex-col gap-4">
 							{#each strava.recent_activities.slice(0, 5) as activity}
-								<div class="activity-item">
-									<div class="activity-info">
-										<h4>{activity.name}</h4>
-										<p class="activity-date">{new Date(activity.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+								<div class="activity-item flex justify-between items-center py-5 px-6 bg-white/[0.02] border border-strava/10 detroit-clip-sm flex-wrap gap-4 transition-all duration-300 hover:bg-strava/[0.04] hover:border-strava/20 hover:translate-x-2 max-md:flex-col max-md:items-start">
+									<div>
+										<h4 class="mb-1 text-white/90 text-[0.95rem] font-normal">{activity.name}</h4>
+										<p class="text-white/35 text-xs tracking-[0.04em]">{new Date(activity.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
 									</div>
-									<div class="activity-stats">
-										<span class="activity-distance">{formatDistance(activity.distance)} km</span>
-										<span class="activity-time">{formatTime(activity.moving_time)}</span>
-										<span class="activity-pace">{formatPace(activity.average_pace)}</span>
+									<div class="flex gap-8 text-sm max-md:w-full max-md:justify-between">
+										<span class="text-strava font-normal">{formatDistance(activity.distance)} km</span>
+										<span class="text-white/50">{formatTime(activity.moving_time)}</span>
+										<span class="text-white/35">{formatPace(activity.average_pace)}</span>
 									</div>
 								</div>
 							{/each}
@@ -368,50 +389,26 @@
 		{/if}
 
 		<!-- Footer -->
-		<footer class="footer">
-			<p>Built with ❤️ using SvelteKit & Go</p>
-			<div class="social-links">
-				<a href="https://github.com/MrCodeEU" target="_blank" rel="noopener noreferrer">GitHub</a>
-				<a href="https://linkedin.com/in/mrcodeeu" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+		<footer class="py-20 px-8 text-center text-white/30 relative mt-16 detroit-divider">
+			<p class="mb-8 text-sm tracking-[0.06em]">Built with SvelteKit & Go</p>
+			<div class="flex justify-center gap-16 max-sm:gap-8">
+				<a href="https://github.com/MrCodeEU" target="_blank" rel="noopener noreferrer" class="text-detroit-primary/70 no-underline transition-all duration-300 text-sm uppercase tracking-[0.15em] relative py-2 px-4 detroit-clip-skew hover:text-detroit-primary hover:bg-detroit-primary/5">GitHub</a>
+				<a href="https://linkedin.com/in/mrcodeeu" target="_blank" rel="noopener noreferrer" class="text-detroit-primary/70 no-underline transition-all duration-300 text-sm uppercase tracking-[0.15em] relative py-2 px-4 detroit-clip-skew hover:text-detroit-primary hover:bg-detroit-primary/5">LinkedIn</a>
 			</div>
 		</footer>
 	{/if}
 </main>
 
 <style>
-	:global(html, body) {
-		margin: 0;
-		padding: 0;
-		min-height: 100%;
-	}
+	/* Minimal custom styles for pseudo-elements and complex animations */
 
-	:global(body) {
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-		background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%);
-		background-attachment: fixed;
-		color: #e0e0e0;
-	}
-
-	.page {
-		position: relative;
-		z-index: 1;
-	}
-
-	/* Loading & Error States */
-	.loading {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-	}
-
+	/* Spinner animation */
 	.spinner {
-		width: 50px;
-		height: 50px;
-		border: 4px solid rgba(102, 126, 234, 0.2);
-		border-top-color: #667eea;
-		border-radius: 50%;
+		width: 60px;
+		height: 60px;
+		border: 2px solid rgba(0, 212, 255, 0.2);
+		border-top-color: #00d4ff;
+		clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 		animation: spin 1s linear infinite;
 	}
 
@@ -419,676 +416,172 @@
 		to { transform: rotate(360deg); }
 	}
 
+	/* Error container gradient border */
 	.error-container {
-		background: rgba(229, 62, 62, 0.1);
-		border: 1px solid rgba(229, 62, 62, 0.3);
-		padding: 2rem;
-		border-radius: 12px;
+		background: rgba(164, 0, 84, 0.1);
+		border: 1px solid rgba(164, 0, 84, 0.4);
+		padding: 2.5rem;
 		text-align: center;
+		position: relative;
 	}
 
-	.error-container h2 {
-		color: #e53e3e;
-		margin: 0 0 1rem;
+	.error-container::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 40px;
+		height: 3px;
+		background: linear-gradient(90deg, #a40054, #f28d1d, transparent);
 	}
 
-	/* Hero Section */
-	.hero {
-		min-height: 100vh;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		text-align: center;
-		padding: 2rem;
-		padding-top: 40vh;
+	/* Hero content gradient borders - inverted so colors meet at corners */
+	.hero-content::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 50px;
+		height: 4px;
+		background: linear-gradient(90deg, #00d4ff 0%, #00d4ff 50%, #f28d1d 80%, #f28d1d 100%);
 	}
 
-	.hero-content {
-		max-width: 700px;
+	.hero-content::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		left: 50px;
+		height: 4px;
+		background: linear-gradient(90deg, #a40054 0%, #a40054 20%, #f28d1d 50%, #f28d1d 100%);
 	}
 
-	.hero h1 {
-		font-size: clamp(2rem, 8vw, 3.5rem);
-		margin: 0 0 0.5rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		line-height: 1.2;
-	}
-
-	.hero .headline {
-		font-size: clamp(1.1rem, 4vw, 1.5rem);
-		color: #a0a0a0;
-		font-weight: 400;
-		margin: 0 0 1rem;
-	}
-
-	.hero .location {
-		color: #808080;
-		font-size: 1rem;
-		margin: 0 0 1.5rem;
-	}
-
-	.hero .summary {
-		font-size: 1.1rem;
-		color: #b0b0b0;
-		line-height: 1.6;
-		margin: 0 0 3rem;
-	}
-
+	/* Scroll indicator bounce */
 	.scroll-indicator {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.5rem;
-		color: #667eea;
 		animation: bounce 2s infinite;
-	}
-
-	.scroll-indicator span {
-		font-size: 0.9rem;
 	}
 
 	@keyframes bounce {
 		0%, 100% { transform: translateY(0); }
-		50% { transform: translateY(10px); }
+		50% { transform: translateY(12px); }
 	}
 
-	/* Section Styles */
-	.section {
-		padding: 4rem 2rem;
-		max-width: 1200px;
-		margin: 0 auto;
+	/* Timeline content gradient borders - colors meet at corner */
+	.timeline-content::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 4px;
+		height: calc(100% - 40px);
+		background: linear-gradient(180deg, #00d4ff 0%, #00d4ff 50%, #f28d1d 80%, #f28d1d 100%);
 	}
 
-	.section-title {
-		text-align: center;
-		font-size: clamp(1.5rem, 5vw, 2rem);
-		margin: 0 0 3rem;
-		color: #fff;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+	.timeline-content::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 40px;
+		height: 3px;
+		background: linear-gradient(90deg, #00d4ff 0%, #00d4ff 50%, #f28d1d 80%, #f28d1d 100%);
 	}
 
-	/* Skills Section */
-	.skills-grid {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		gap: 0.75rem;
+	/* Education card gradient borders - colors meet at corner */
+	.education-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 40px;
+		height: 3px;
+		background: linear-gradient(90deg, #f28d1d 0%, #f28d1d 50%, #a40054 80%, #a40054 100%);
 	}
 
-	.skill-tag {
-		background: rgba(102, 126, 234, 0.15);
-		color: #667eea;
-		padding: 0.5rem 1.25rem;
-		border-radius: 25px;
-		font-size: 0.9rem;
-		border: 1px solid rgba(102, 126, 234, 0.3);
-		transition: all 0.3s ease;
+	.education-card::after {
+		content: '';
+		position: absolute;
+		top: 40px;
+		right: 0;
+		width: 3px;
+		height: calc(100% - 80px);
+		background: linear-gradient(180deg, #a40054 0%, #a40054 30%, #f28d1d 70%, transparent 100%);
 	}
 
-	.skill-tag:hover {
-		background: rgba(102, 126, 234, 0.25);
-		transform: translateY(-2px);
+	/* Project image container clip */
+	.project-image-container {
+		clip-path: polygon(0 0, calc(100% - 50px) 0, 100% 50px, 100% 100%, 0 100%);
 	}
 
-	/* Experience Timeline */
-	.timeline {
-		position: relative;
-		padding-left: 2rem;
+	/* Strava section gradient borders */
+	.strava-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 35px;
+		right: 35px;
+		height: 3px;
+		background: linear-gradient(90deg, transparent 0%, #fc4c02 20%, #fc4c02 60%, #f28d1d 80%, transparent 100%);
 	}
 
-	.timeline::before {
+	.strava-section::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 35px;
+		right: 35px;
+		height: 3px;
+		background: linear-gradient(90deg, transparent 0%, #f28d1d 20%, #fc4c02 40%, #fc4c02 80%, transparent 100%);
+	}
+
+	/* Activity item left border */
+	.activity-item::before {
 		content: '';
 		position: absolute;
 		left: 0;
 		top: 0;
-		bottom: 0;
-		width: 2px;
-		background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+		bottom: 25px;
+		width: 4px;
+		background: linear-gradient(180deg, #fc4c02 0%, #fc4c02 50%, #f28d1d 80%, transparent 100%);
 	}
 
-	.timeline-item {
-		position: relative;
-		margin-bottom: 2rem;
-	}
-
-	.timeline-marker {
-		position: absolute;
-		left: -2rem;
-		top: 0.5rem;
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		background: #667eea;
-		transform: translateX(-50%);
-		box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
-	}
-
-	.timeline-content {
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 16px;
-		padding: 1.5rem;
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		margin-left: 1rem;
-	}
-
-	.timeline-header {
-		display: flex;
-		gap: 1rem;
-		align-items: flex-start;
-	}
-
-	.company-logo {
-		width: 50px;
-		height: 50px;
-		border-radius: 8px;
-		object-fit: cover;
-		flex-shrink: 0;
-	}
-
+	/* Company logo placeholder gradient */
 	.company-logo-placeholder {
-		width: 50px;
-		height: 50px;
-		border-radius: 8px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: bold;
-		font-size: 1.25rem;
-		color: white;
-		flex-shrink: 0;
+		background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 136, 170, 0.2) 100%);
 	}
 
-	.timeline-info h3 {
-		margin: 0 0 0.25rem;
-		color: #fff;
-		font-size: 1.1rem;
-	}
-
-	.timeline-info .company {
-		color: #667eea;
-		margin: 0 0 0.25rem;
-		font-weight: 500;
-	}
-
-	.timeline-info .meta {
-		color: #808080;
-		font-size: 0.85rem;
-		margin: 0;
-	}
-
-	.timeline-info .location-small {
-		color: #707070;
-		font-size: 0.8rem;
-		margin: 0.25rem 0 0;
-	}
-
-	.timeline-content .description {
-		color: #a0a0a0;
-		margin: 1rem 0 0;
-		line-height: 1.6;
-	}
-
-	/* Education Section */
-	.education-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.education-card {
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 16px;
-		padding: 1.5rem;
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		transition: transform 0.3s ease;
-	}
-
-	.education-card:hover {
-		transform: translateY(-4px);
-	}
-
-	.education-header {
-		display: flex;
-		gap: 1rem;
-		align-items: flex-start;
-	}
-
-	.school-logo {
-		width: 50px;
-		height: 50px;
-		border-radius: 8px;
-		object-fit: cover;
-		flex-shrink: 0;
-	}
-
-	.school-logo-placeholder {
-		width: 50px;
-		height: 50px;
-		border-radius: 8px;
-		background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: bold;
-		font-size: 1.25rem;
-		color: white;
-		flex-shrink: 0;
-	}
-
-	.education-info h3 {
-		margin: 0 0 0.25rem;
-		color: #fff;
-		font-size: 1.1rem;
-	}
-
-	.education-info .degree {
-		color: #667eea;
-		margin: 0 0 0.25rem;
-		font-weight: 500;
-	}
-
-	.education-info .date {
-		color: #808080;
-		font-size: 0.85rem;
-		margin: 0;
-	}
-
-	.education-card .description {
-		color: #a0a0a0;
-		margin: 1rem 0 0;
-		line-height: 1.6;
-	}
-
-	/* Projects Section */
-	.projects-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.project-card {
-		background: rgba(255, 255, 255, 0.05);
-		border-radius: 16px;
-		overflow: hidden;
-		backdrop-filter: blur(10px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.project-card:hover {
-		transform: translateY(-8px);
-		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-	}
-
-	.project-image-container {
-		position: relative;
-		height: 180px;
-		overflow: hidden;
-	}
-
-	.project-image {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		transition: transform 0.3s ease;
-	}
-
-	.project-card:hover .project-image {
-		transform: scale(1.05);
-	}
-
-	.project-image-placeholder {
-		height: 180px;
-		position: relative;
-	}
-
-	.featured-badge {
+	/* Stat card top border */
+	.stat-card::before {
+		content: '';
 		position: absolute;
-		top: 12px;
-		right: 12px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		padding: 0.4rem 0.8rem;
-		border-radius: 20px;
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
+		top: 0;
+		left: 15px;
+		right: 15px;
+		height: 2px;
+		background: linear-gradient(90deg, transparent, rgba(252, 76, 2, 0.5), #fc4c02, rgba(252, 76, 2, 0.5), transparent);
 	}
 
-	.project-content {
-		padding: 1.5rem;
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.project-content h3 {
-		margin: 0 0 0.75rem;
-	}
-
-	.project-content h3 a {
-		color: #fff;
-		text-decoration: none;
-		transition: color 0.3s ease;
-	}
-
-	.project-content h3 a:hover {
-		color: #667eea;
-	}
-
-	.project-content .description {
-		color: #a0a0a0;
-		font-size: 0.9rem;
-		line-height: 1.6;
-		flex: 1;
-		margin: 0 0 1rem;
-	}
-
-	.project-meta {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		font-size: 0.85rem;
-		color: #808080;
-		margin-bottom: 1rem;
-	}
-
-	.language {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
-	}
-
-	.language-dot {
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-	}
-
-	.topics {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	.topic-tag {
-		background: rgba(102, 126, 234, 0.15);
-		color: #667eea;
-		padding: 0.25rem 0.75rem;
-		border-radius: 20px;
-		font-size: 0.75rem;
-	}
-
-	/* Strava Section */
-	.strava-section {
-		background: rgba(252, 76, 2, 0.03);
-		border-radius: 24px;
-		margin: 2rem auto;
-		border: 1px solid rgba(252, 76, 2, 0.1);
-	}
-
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-		gap: 1rem;
-		margin-bottom: 2rem;
-	}
-
-	.stat-card {
-		text-align: center;
-		padding: 1.5rem 1rem;
-		background: rgba(252, 76, 2, 0.1);
-		border-radius: 16px;
-		border: 1px solid rgba(252, 76, 2, 0.2);
-	}
-
-	.stat-icon {
-		font-size: 1.5rem;
-		margin-bottom: 0.5rem;
-	}
-
-	.stat-value {
-		font-size: 1.75rem;
-		font-weight: bold;
-		color: #fc4c02;
-		margin: 0;
-	}
-
-	.stat-label {
-		margin: 0.25rem 0 0;
-		color: #a0a0a0;
-		font-size: 0.85rem;
-	}
-
-	.ytd-section {
-		text-align: center;
-		margin-bottom: 2rem;
-	}
-
-	.ytd-section h3 {
-		color: #fff;
-		margin: 0 0 0.5rem;
-		font-size: 1.1rem;
-	}
-
-	.ytd-stats {
-		display: flex;
-		justify-content: center;
-		gap: 0.75rem;
-		color: #a0a0a0;
-		font-size: 0.9rem;
-	}
-
-	.records-section {
-		margin-bottom: 2rem;
-	}
-
-	.records-section h3 {
-		color: #fff;
-		margin: 0 0 1rem;
-		font-size: 1.1rem;
-	}
-
-	.records-grid {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-	}
-
-	.record-card {
-		background: rgba(255, 255, 255, 0.05);
-		padding: 0.75rem 1.25rem;
-		border-radius: 12px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.25rem;
-	}
-
-	.record-type {
-		color: #808080;
-		font-size: 0.8rem;
-		text-transform: uppercase;
-	}
-
-	.record-time {
-		color: #fc4c02;
-		font-weight: bold;
-	}
-
-	.recent-section h3 {
-		color: #fff;
-		margin: 0 0 1rem;
-		font-size: 1.1rem;
-	}
-
-	.activities-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.activity-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem;
-		background: rgba(255, 255, 255, 0.03);
-		border-radius: 12px;
-		border-left: 3px solid #fc4c02;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	.activity-info h4 {
-		margin: 0 0 0.25rem;
-		color: #fff;
-		font-size: 1rem;
-	}
-
-	.activity-date {
-		color: #808080;
-		font-size: 0.8rem;
-		margin: 0;
-	}
-
-	.activity-stats {
-		display: flex;
-		gap: 1rem;
-		font-size: 0.9rem;
-	}
-
-	.activity-distance {
-		color: #fc4c02;
-		font-weight: 500;
-	}
-
-	.activity-time {
-		color: #a0a0a0;
-	}
-
-	.activity-pace {
-		color: #808080;
-	}
-
-	/* Footer */
-	.footer {
-		padding: 3rem 2rem;
-		text-align: center;
-		color: #606060;
-		border-top: 1px solid rgba(255, 255, 255, 0.05);
-		margin-top: 2rem;
-	}
-
-	.footer p {
-		margin: 0 0 1rem;
-	}
-
-	.social-links {
-		display: flex;
-		justify-content: center;
-		gap: 2rem;
-	}
-
-	.social-links a {
-		color: #667eea;
-		text-decoration: none;
-		transition: color 0.3s ease;
-	}
-
-	.social-links a:hover {
-		color: #764ba2;
-	}
-
-	/* Mobile Responsiveness */
+	/* Mobile adjustments */
 	@media (max-width: 768px) {
-		.hero {
-			min-height: 90vh;
-			padding: 1.5rem;
+		.hero-content {
+			padding: 2rem;
+			clip-path: polygon(0 0, calc(100% - 30px) 0, 100% 30px, 100% 100%, 30px 100%, 0 calc(100% - 30px));
 		}
 
-		.section {
-			padding: 3rem 1.5rem;
+		.strava-section {
+			clip-path: polygon(0 20px, 20px 0, calc(100% - 20px) 0, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px));
 		}
 
-		.timeline {
-			padding-left: 1.5rem;
-		}
-
-		.timeline-content {
-			margin-left: 0.5rem;
-			padding: 1rem;
-		}
-
-		.timeline-header {
-			flex-direction: column;
-			gap: 0.75rem;
-		}
-
-		.company-logo,
-		.company-logo-placeholder,
-		.school-logo,
-		.school-logo-placeholder {
-			width: 40px;
-			height: 40px;
-		}
-
-		.education-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.projects-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.stats-grid {
-			grid-template-columns: repeat(2, 1fr);
-		}
-
-		.activity-item {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.activity-stats {
-			width: 100%;
-			justify-content: space-between;
+		.strava-section::before,
+		.strava-section::after {
+			left: 20px;
+			right: 20px;
 		}
 	}
 
 	@media (max-width: 480px) {
-		.hero h1 {
-			font-size: 1.75rem;
-		}
-
-		.hero .headline {
-			font-size: 1rem;
-		}
-
-		.stats-grid {
-			grid-template-columns: 1fr 1fr;
-		}
-
-		.stat-card {
-			padding: 1rem;
-		}
-
-		.stat-value {
-			font-size: 1.4rem;
-		}
-
-		.ytd-stats {
-			flex-wrap: wrap;
+		.hero-content {
+			clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
 		}
 	}
 </style>
