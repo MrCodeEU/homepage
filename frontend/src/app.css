@@ -1,0 +1,548 @@
+@import "tailwindcss";
+
+/* ===== DETROIT: BECOME HUMAN THEME ===== */
+/* Primary: Cyan #00d4ff | Secondary: Orange #f28d1d -> Magenta #a40054 */
+
+@theme {
+	/* Primary Colors - Cyan */
+	--color-detroit-primary: #00d4ff;
+	--color-detroit-primary-dark: #00a8cc;
+	--color-detroit-primary-darker: #0088aa;
+
+	/* Secondary Colors - Logo Gradient */
+	--color-detroit-secondary: #f28d1d;
+	--color-detroit-secondary-dark: #d45a3a;
+	--color-detroit-accent: #a40054;
+
+	/* Background Colors */
+	--color-detroit-bg: #050508;
+	--color-detroit-bg-light: #0a0a12;
+	--color-detroit-bg-card: rgba(8, 8, 15, 0.8);
+	--color-detroit-bg-card-light: rgba(8, 8, 15, 0.6);
+
+	/* Text Colors */
+	--color-detroit-text: #c8c8c8;
+	--color-detroit-text-muted: rgba(255, 255, 255, 0.45);
+	--color-detroit-text-dim: rgba(255, 255, 255, 0.35);
+
+	/* Border Colors */
+	--color-detroit-border-primary: rgba(0, 212, 255, 0.15);
+	--color-detroit-border-secondary: rgba(242, 141, 29, 0.15);
+
+	/* Strava Orange */
+	--color-strava: #fc4c02;
+
+	/* Corner cut sizes */
+	--detroit-cut-xs: 15px;
+	--detroit-cut-sm: 25px;
+	--detroit-cut-md: 40px;
+	--detroit-cut-lg: 50px;
+
+	/* Border widths */
+	--detroit-border-thin: 2px;
+	--detroit-border-medium: 3px;
+	--detroit-border-thick: 4px;
+}
+
+/* ===== BASE STYLES ===== */
+html, body {
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+}
+
+body {
+	font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+	background: linear-gradient(135deg, var(--color-detroit-bg) 0%, var(--color-detroit-bg-light) 50%, #08080d 100%);
+	background-attachment: fixed;
+	color: var(--color-detroit-text);
+	font-weight: 300;
+	letter-spacing: 0.02em;
+}
+
+/* ===== DETROIT CLIP PATHS ===== */
+.detroit-clip-xs {
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--detroit-cut-xs)) 0,
+		100% var(--detroit-cut-xs),
+		100% 100%,
+		var(--detroit-cut-xs) 100%,
+		0 calc(100% - var(--detroit-cut-xs))
+	);
+}
+
+.detroit-clip-sm {
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--detroit-cut-sm)) 0,
+		100% var(--detroit-cut-sm),
+		100% 100%,
+		var(--detroit-cut-sm) 100%,
+		0 calc(100% - var(--detroit-cut-sm))
+	);
+}
+
+.detroit-clip-md {
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--detroit-cut-md)) 0,
+		100% var(--detroit-cut-md),
+		100% 100%,
+		var(--detroit-cut-md) 100%,
+		0 calc(100% - var(--detroit-cut-md))
+	);
+}
+
+.detroit-clip-lg {
+	clip-path: polygon(
+		0 0,
+		calc(100% - var(--detroit-cut-lg)) 0,
+		100% var(--detroit-cut-lg),
+		100% 100%,
+		var(--detroit-cut-lg) 100%,
+		0 calc(100% - var(--detroit-cut-lg))
+	);
+}
+
+/* Parallelogram clip */
+.detroit-clip-skew {
+	clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+}
+
+/* Diamond marker */
+.detroit-clip-diamond {
+	clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Hexagon */
+.detroit-clip-hex {
+	clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Arrow/chevron shape */
+.detroit-clip-arrow {
+	clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+}
+
+/* Octagon */
+.detroit-clip-oct {
+	clip-path: polygon(
+		0 35px, 35px 0, calc(100% - 35px) 0, 100% 35px,
+		100% calc(100% - 35px), calc(100% - 35px) 100%, 35px 100%, 0 calc(100% - 35px)
+	);
+}
+
+/* ===== GRADIENT BORDER LINES - ENHANCED ===== */
+
+/* Top border - primary to secondary gradient (thick) */
+.detroit-border-top {
+	position: relative;
+}
+.detroit-border-top::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: var(--detroit-cut-lg);
+	height: var(--detroit-border-thick);
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 40%, var(--color-detroit-secondary) 70%, var(--color-detroit-accent) 100%);
+	z-index: 10;
+}
+
+/* Right border - vertical gradient (thick) */
+.detroit-border-right {
+	position: relative;
+}
+.detroit-border-right::after {
+	content: '';
+	position: absolute;
+	top: var(--detroit-cut-lg);
+	right: 0;
+	width: var(--detroit-border-thick);
+	height: calc(100% - calc(var(--detroit-cut-lg) * 2));
+	background: linear-gradient(180deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 40%, var(--color-detroit-secondary) 70%, var(--color-detroit-accent) 90%, transparent 100%);
+	z-index: 10;
+}
+
+/* Bottom border - secondary gradient (thick) */
+.detroit-border-bottom {
+	position: relative;
+}
+.detroit-border-bottom::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: var(--detroit-cut-lg);
+	right: 0;
+	height: var(--detroit-border-thick);
+	background: linear-gradient(90deg, transparent, var(--color-detroit-accent), var(--color-detroit-secondary));
+	z-index: 10;
+}
+
+/* Left border - vertical gradient (thick) */
+.detroit-border-left {
+	position: relative;
+}
+.detroit-border-left::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: var(--detroit-border-thick);
+	height: calc(100% - var(--detroit-cut-lg));
+	background: linear-gradient(180deg, var(--color-detroit-primary), var(--color-detroit-primary-dark), transparent);
+	z-index: 10;
+}
+
+/* Full frame border - all sides */
+.detroit-border-frame {
+	position: relative;
+}
+.detroit-border-frame::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: var(--detroit-cut-lg);
+	height: var(--detroit-border-thick);
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 50%, var(--color-detroit-secondary) 80%, var(--color-detroit-secondary) 100%);
+	z-index: 10;
+}
+.detroit-border-frame::after {
+	content: '';
+	position: absolute;
+	top: var(--detroit-cut-lg);
+	right: 0;
+	width: var(--detroit-border-thick);
+	height: calc(100% - calc(var(--detroit-cut-lg) * 2));
+	background: linear-gradient(180deg, var(--color-detroit-secondary) 0%, var(--color-detroit-secondary) 20%, var(--color-detroit-accent) 50%, var(--color-detroit-accent) 80%, transparent 100%);
+	z-index: 10;
+}
+
+/* Corner accent borders for cut corners - uses background gradients */
+.detroit-corner-accent {
+	position: relative;
+}
+
+/* Top-right diagonal corner border */
+.detroit-corner-accent-tr {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: calc(var(--detroit-cut-lg) * 1.42); /* hypotenuse of 45deg triangle */
+	height: var(--detroit-border-thick);
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-secondary) 100%);
+	transform-origin: top right;
+	transform: rotate(45deg) translateY(-50%);
+	z-index: 11;
+	pointer-events: none;
+}
+
+/* Bottom-left diagonal corner border */
+.detroit-corner-accent-bl {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: calc(var(--detroit-cut-lg) * 1.42);
+	height: var(--detroit-border-thick);
+	background: linear-gradient(90deg, var(--color-detroit-accent) 0%, var(--color-detroit-secondary) 100%);
+	transform-origin: bottom left;
+	transform: rotate(45deg) translateY(50%);
+	z-index: 11;
+	pointer-events: none;
+}
+
+/* Combined class that adds both corner accents via child elements */
+.detroit-corners-lg {
+	position: relative;
+}
+.detroit-corners-lg > .corner-tr,
+.detroit-corners-lg > .corner-bl {
+	position: absolute;
+	width: calc(var(--detroit-cut-lg) * 1.42);
+	height: var(--detroit-border-thick);
+	pointer-events: none;
+	z-index: 11;
+}
+.detroit-corners-lg > .corner-tr {
+	top: 0;
+	right: 0;
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-secondary) 100%);
+	transform-origin: top right;
+	transform: rotate(45deg) translateY(-50%);
+}
+.detroit-corners-lg > .corner-bl {
+	bottom: 0;
+	left: 0;
+	background: linear-gradient(90deg, var(--color-detroit-accent) 0%, var(--color-detroit-secondary) 100%);
+	transform-origin: bottom left;
+	transform: rotate(45deg) translateY(50%);
+}
+
+/* Medium size corner accents (for detroit-clip-md) */
+.detroit-corners-md {
+	position: relative;
+}
+.detroit-corners-md > .corner-tr,
+.detroit-corners-md > .corner-bl {
+	position: absolute;
+	width: calc(var(--detroit-cut-md) * 1.42);
+	height: var(--detroit-border-medium);
+	pointer-events: none;
+	z-index: 11;
+}
+.detroit-corners-md > .corner-tr {
+	top: 0;
+	right: 0;
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-secondary) 100%);
+	transform-origin: top right;
+	transform: rotate(45deg) translateY(-50%);
+}
+.detroit-corners-md > .corner-bl {
+	bottom: 0;
+	left: 0;
+	background: linear-gradient(90deg, var(--color-detroit-accent) 0%, var(--color-detroit-secondary) 100%);
+	transform-origin: bottom left;
+	transform: rotate(45deg) translateY(50%);
+}
+
+/* Secondary color variant for education cards */
+.detroit-corners-md-secondary > .corner-tr {
+	background: linear-gradient(90deg, var(--color-detroit-secondary) 0%, var(--color-detroit-accent) 100%);
+}
+.detroit-corners-md-secondary > .corner-bl {
+	background: linear-gradient(90deg, var(--color-detroit-accent) 0%, var(--color-detroit-secondary) 100%);
+}
+
+/* Horizontal divider line - skewed */
+.detroit-divider {
+	position: relative;
+}
+.detroit-divider::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 10%;
+	right: 10%;
+	height: 2px;
+	background: linear-gradient(90deg, transparent 0%, var(--color-detroit-primary) 15%, var(--color-detroit-primary) 50%, var(--color-detroit-secondary) 75%, var(--color-detroit-accent) 85%, transparent 100%);
+	transform: skewX(-45deg);
+}
+.detroit-divider::after {
+	content: '';
+	position: absolute;
+	top: 10px;
+	left: 15%;
+	right: 15%;
+	height: 2px;
+	background: linear-gradient(90deg, transparent, var(--color-detroit-secondary), transparent);
+	transform: skewX(-45deg);
+	opacity: 0.5;
+}
+
+/* Glow effect for borders */
+.detroit-glow-primary {
+	box-shadow:
+		0 0 30px rgba(0, 212, 255, 0.15),
+		0 0 60px rgba(0, 212, 255, 0.08),
+		inset 0 0 30px rgba(0, 212, 255, 0.03);
+}
+
+.detroit-glow-secondary {
+	box-shadow:
+		0 0 30px rgba(242, 141, 29, 0.15),
+		0 0 60px rgba(242, 141, 29, 0.08),
+		inset 0 0 30px rgba(242, 141, 29, 0.03);
+}
+
+/* ===== DETROIT CARD COMPONENTS ===== */
+.detroit-card {
+	background: var(--color-detroit-bg-card);
+	backdrop-filter: blur(25px);
+	-webkit-backdrop-filter: blur(25px);
+	border: 1px solid var(--color-detroit-border-primary);
+	transition: all 0.4s ease;
+}
+
+.detroit-card:hover {
+	border-color: rgba(0, 212, 255, 0.3);
+	transform: translateY(-8px) translateX(4px);
+	box-shadow:
+		0 25px 80px rgba(0, 0, 0, 0.5),
+		0 0 50px rgba(0, 212, 255, 0.1),
+		-10px 10px 30px rgba(0, 212, 255, 0.05);
+}
+
+.detroit-card-secondary {
+	background: var(--color-detroit-bg-card);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid var(--color-detroit-border-secondary);
+	transition: all 0.3s ease;
+}
+
+.detroit-card-secondary:hover {
+	border-color: rgba(242, 141, 29, 0.35);
+	transform: translateY(-6px) translateX(3px);
+	box-shadow:
+		0 15px 50px rgba(0, 0, 0, 0.4),
+		0 0 30px rgba(242, 141, 29, 0.08);
+}
+
+/* ===== DETROIT TEXT STYLES ===== */
+.detroit-text-gradient-primary {
+	background: linear-gradient(135deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary-dark) 50%, var(--color-detroit-primary-darker) 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.detroit-text-gradient-secondary {
+	background: linear-gradient(135deg, var(--color-detroit-secondary) 0%, var(--color-detroit-secondary-dark) 50%, var(--color-detroit-accent) 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* ===== DETROIT TITLE WITH ACCENT BAR ===== */
+.detroit-title {
+	position: relative;
+	display: inline-block;
+	padding-left: 1.5rem;
+}
+
+.detroit-title::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: var(--detroit-border-thick);
+	background: linear-gradient(180deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 60%, var(--color-detroit-secondary) 100%);
+	transform: skewX(-15deg);
+}
+
+.detroit-title::after {
+	content: '';
+	position: absolute;
+	bottom: -12px;
+	left: 1.5rem;
+	width: 100px;
+	height: 3px;
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 50%, var(--color-detroit-secondary) 80%, transparent 100%);
+	transform: skewX(-45deg);
+}
+
+/* ===== DETROIT TAG/BADGE ===== */
+.detroit-tag {
+	background: rgba(0, 212, 255, 0.06);
+	color: var(--color-detroit-primary);
+	border: 1px solid rgba(0, 212, 255, 0.2);
+	clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+	position: relative;
+	transition: all 0.3s ease;
+}
+
+.detroit-tag::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 15px;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 50%, var(--color-detroit-secondary) 80%, transparent 100%);
+	opacity: 0.6;
+}
+
+.detroit-tag:hover {
+	background: rgba(0, 212, 255, 0.12);
+	border-color: rgba(0, 212, 255, 0.5);
+	transform: translateX(5px);
+	box-shadow:
+		0 0 25px rgba(0, 212, 255, 0.15),
+		-5px 0 20px rgba(0, 212, 255, 0.1);
+}
+
+.detroit-tag-secondary {
+	background: rgba(242, 141, 29, 0.08);
+	color: var(--color-detroit-secondary);
+	border: 1px solid rgba(242, 141, 29, 0.2);
+	clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+/* ===== DETROIT TIMELINE ===== */
+.detroit-timeline {
+	position: relative;
+	padding-left: 4rem;
+}
+
+.detroit-timeline::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 3px;
+	background: linear-gradient(180deg,
+		var(--color-detroit-primary) 0%,
+		var(--color-detroit-primary) 50%,
+		var(--color-detroit-secondary) 80%,
+		var(--color-detroit-accent) 100%
+	);
+	transform: skewX(-5deg);
+}
+
+.detroit-timeline-marker {
+	position: absolute;
+	left: -4rem;
+	width: 16px;
+	height: 16px;
+	background: var(--color-detroit-primary);
+	clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+	transform: translateX(-50%);
+	box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+/* ===== DETROIT FEATURED BADGE ===== */
+.detroit-badge {
+	background: linear-gradient(90deg, var(--color-detroit-primary), var(--color-detroit-primary-dark));
+	color: white;
+	clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%);
+	box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes detroit-float {
+	0%, 100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+	50% { transform: translateY(-30px) rotate(8deg); opacity: 0.7; }
+}
+
+@keyframes detroit-pulse {
+	0%, 100% { opacity: 1; box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+	50% { opacity: 0.8; box-shadow: 0 0 40px rgba(0, 212, 255, 0.8); }
+}
+
+@keyframes detroit-scan {
+	0% { transform: translateX(-100%); }
+	100% { transform: translateX(100%); }
+}
+
+.detroit-animate-float {
+	animation: detroit-float 10s ease-in-out infinite;
+}
+
+.detroit-animate-pulse {
+	animation: detroit-pulse 2s ease-in-out infinite;
+}
+
+/* ===== DECORATIVE TRIANGLES ===== */
+.detroit-triangle-up {
+	clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+	border: 1px solid rgba(0, 212, 255, 0.12);
+}
+
+.detroit-triangle-down {
+	clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+	border: 1px solid rgba(0, 212, 255, 0.08);
+}
