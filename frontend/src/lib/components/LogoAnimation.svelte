@@ -444,7 +444,7 @@
 
 		// Calculate logo center position
 		const logoCenterX = viewportWidth / 2;
-		const logoCenterY = viewportHeight / 2;
+		const logoCenterY = viewportHeight / 5;
 
 		// Calculate scale factor to fit logo to desired size
 		const scaleFactor = logoSize / Math.max(svgWidth, svgHeight);
