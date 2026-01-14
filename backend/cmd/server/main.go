@@ -29,9 +29,17 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Initialize data loader
+	// Create a context for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Initialize data loader with configured refresh interval
 	dataLoader = storage.NewDataLoader("")
-	log.Printf("Data loader initialized")
+	dataLoader.SetRefreshInterval(cfg.DataRefreshInterval)
+	log.Printf("Data loader initialized (refresh interval: %v)", cfg.DataRefreshInterval)
+
+	// Start auto-refresh from GitHub in background
+	dataLoader.StartAutoRefresh(ctx)
 
 	// Create HTTP server
 	mux := http.NewServeMux()
@@ -85,10 +93,14 @@ func main() {
 	<-quit
 
 	log.Println("Server shutting down...")
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	
+	// Cancel the auto-refresh context to stop background goroutine
+	cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer shutdownCancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 
@@ -141,11 +153,27 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 func handleCV(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// Check if LinkedIn data file exists
+	if !dataLoader.DataExists("linkedin") {
+		log.Printf("LinkedIn data file not found - data generation may not have run for LinkedIn source")
+		// Return empty data structure instead of error for better UX
+		emptyData := map[string]interface{}{
+			"profile":    map[string]string{},
+			"experience": []interface{}{},
+			"education":  []interface{}{},
+			"skills":     []string{},
+		}
+		if err := json.NewEncoder(w).Encode(emptyData); err != nil {
+			log.Printf("Error encoding empty CV data: %v", err)
+		}
+		return
+	}
+
 	// Try to load LinkedIn data
 	linkedInData, err := dataLoader.LoadLinkedIn()
 	if err != nil {
 		log.Printf("Error loading LinkedIn data: %v", err)
-		http.Error(w, "Failed to load CV data", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to load CV data: %v", err), http.StatusInternalServerError)
 		return
 	}
 

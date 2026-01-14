@@ -2,6 +2,8 @@ package config
 
 import (
 	"os"
+	"strconv"
+	"time"
 )
 
 type Config struct {
@@ -25,6 +27,9 @@ type Config struct {
 	// Cache settings
 	CacheDir      string
 	CacheTTLHours int
+
+	// Data refresh settings
+	DataRefreshInterval time.Duration
 }
 
 func Load() *Config {
@@ -45,6 +50,8 @@ func Load() *Config {
 
 		CacheDir:      getEnv("CACHE_DIR", "./data/cache"),
 		CacheTTLHours: 24,
+
+		DataRefreshInterval: getEnvDuration("DATA_REFRESH_HOURS", 4) * time.Hour,
 	}
 }
 
@@ -53,4 +60,13 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func getEnvDuration(key string, defaultHours int) time.Duration {
+	if value := os.Getenv(key); value != "" {
+		if hours, err := strconv.Atoi(value); err == nil && hours > 0 {
+			return time.Duration(hours)
+		}
+	}
+	return time.Duration(defaultHours)
 }

@@ -310,41 +310,41 @@
 
 		<!-- Strava Section -->
 		{#if strava}
-			<section class="strava-section detroit-clip-oct py-24 px-8 max-w-[1200px] mx-auto my-12 bg-detroit-bg-card-light backdrop-blur-[20px] border border-strava/10 relative">
+			<section class="strava-section detroit-clip-oct py-24 px-8 max-w-[1200px] mx-auto my-12 bg-detroit-bg-card-light backdrop-blur-[20px] border border-detroit-primary/15 relative">
 				<h2 class="detroit-title text-[clamp(2rem,5vw,3rem)] mb-14 text-white/95 font-extralight tracking-[0.2em] uppercase">Running Stats</h2>
 
 				<!-- Stats Overview -->
 				<div class="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-5 mb-10">
-					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+					<div class="stat-card text-center py-7 px-4 bg-detroit-primary/5 border border-detroit-primary/15 detroit-clip-oct transition-all duration-300 hover:bg-detroit-primary/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,212,255,0.1)]">
 						<div class="text-2xl mb-2 opacity-80"></div>
-						<p class="text-3xl font-light text-strava m-0 tracking-tight">{strava.total_stats.count}</p>
+						<p class="text-3xl font-light text-detroit-primary m-0 tracking-tight">{strava.total_stats.count}</p>
 						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Total Runs</p>
 					</div>
-					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+					<div class="stat-card text-center py-7 px-4 bg-detroit-primary/5 border border-detroit-primary/15 detroit-clip-oct transition-all duration-300 hover:bg-detroit-primary/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,212,255,0.1)]">
 						<div class="text-2xl mb-2 opacity-80"></div>
-						<p class="text-3xl font-light text-strava m-0 tracking-tight">{formatDistance(strava.total_stats.distance)} km</p>
+						<p class="text-3xl font-light text-detroit-primary m-0 tracking-tight">{formatDistance(strava.total_stats.distance)} km</p>
 						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Total Distance</p>
 					</div>
-					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+					<div class="stat-card text-center py-7 px-4 bg-detroit-primary/5 border border-detroit-primary/15 detroit-clip-oct transition-all duration-300 hover:bg-detroit-primary/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,212,255,0.1)]">
 						<div class="text-2xl mb-2 opacity-80"></div>
-						<p class="text-3xl font-light text-strava m-0 tracking-tight">{formatTime(strava.total_stats.moving_time)}</p>
+						<p class="text-3xl font-light text-detroit-primary m-0 tracking-tight">{formatTime(strava.total_stats.moving_time)}</p>
 						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Total Time</p>
 					</div>
-					<div class="stat-card text-center py-7 px-4 bg-strava/5 border border-strava/10 detroit-clip-oct transition-all duration-300 hover:bg-strava/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(252,76,2,0.1)]">
+					<div class="stat-card text-center py-7 px-4 bg-detroit-primary/5 border border-detroit-primary/15 detroit-clip-oct transition-all duration-300 hover:bg-detroit-primary/10 hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(0,212,255,0.1)]">
 						<div class="text-2xl mb-2 opacity-80"></div>
-						<p class="text-3xl font-light text-strava m-0 tracking-tight">{Math.round(strava.total_stats.elevation_gain)} m</p>
+						<p class="text-3xl font-light text-detroit-primary m-0 tracking-tight">{Math.round(strava.total_stats.elevation_gain)} m</p>
 						<p class="mt-1 text-white/40 text-[0.7rem] uppercase tracking-[0.12em]">Elevation Gain</p>
 					</div>
 				</div>
 
 				<!-- Year to Date Stats -->
-				<div class="text-center mb-10 py-7 bg-strava/5 detroit-clip-hex">
+				<div class="text-center mb-10 py-7 bg-detroit-primary/5 detroit-clip-hex-square border border-detroit-primary/15">
 					<h3 class="text-white/80 mb-3 text-sm font-normal uppercase tracking-[0.2em]">Year to Date</h3>
 					<div class="flex justify-center gap-8 text-white/50 text-sm flex-wrap">
 						<span>{strava.year_to_date_stats.count} runs</span>
-						<span class="w-1.5 h-1.5 bg-strava/60 detroit-clip-diamond self-center"></span>
+						<span class="w-1.5 h-1.5 bg-detroit-primary/60 detroit-clip-diamond self-center"></span>
 						<span>{formatDistance(strava.year_to_date_stats.distance)} km</span>
-						<span class="w-1.5 h-1.5 bg-strava/60 detroit-clip-diamond self-center"></span>
+						<span class="w-1.5 h-1.5 bg-detroit-primary/60 detroit-clip-diamond self-center"></span>
 						<span>{formatTime(strava.year_to_date_stats.moving_time)}</span>
 					</div>
 				</div>
@@ -355,9 +355,9 @@
 						<h3 class="text-white/80 mb-5 text-sm font-normal uppercase tracking-[0.12em]">Personal Records</h3>
 						<div class="flex flex-wrap gap-4">
 							{#each strava.personal_records as record}
-								<div class="bg-white/[0.02] py-4 px-8 border border-strava/10 detroit-clip-skew flex flex-col items-center gap-1 transition-all duration-300 hover:bg-strava/5 hover:translate-x-1">
+								<div class="bg-white/[0.02] py-4 px-8 border border-detroit-primary/15 detroit-clip-skew flex flex-col items-center gap-1 transition-all duration-300 hover:bg-detroit-primary/5 hover:translate-x-1">
 									<span class="text-white/40 text-[0.65rem] uppercase tracking-[0.12em]">{record.type}</span>
-									<span class="text-strava font-normal text-lg">{formatTime(record.time)}</span>
+									<span class="text-detroit-primary font-normal text-lg">{formatTime(record.time)}</span>
 								</div>
 							{/each}
 						</div>
@@ -370,13 +370,13 @@
 						<h3 class="text-white/80 mb-5 text-sm font-normal uppercase tracking-[0.12em]">Recent Runs</h3>
 						<div class="flex flex-col gap-4">
 							{#each strava.recent_activities.slice(0, 5) as activity}
-								<div class="activity-item flex justify-between items-center py-5 px-6 bg-white/[0.02] border border-strava/10 detroit-clip-sm flex-wrap gap-4 transition-all duration-300 hover:bg-strava/[0.04] hover:border-strava/20 hover:translate-x-2 max-md:flex-col max-md:items-start">
+								<div class="activity-item flex justify-between items-center py-5 px-6 bg-white/[0.02] border border-detroit-primary/15 detroit-clip-sm flex-wrap gap-4 transition-all duration-300 hover:bg-detroit-primary/[0.04] hover:border-detroit-primary/25 hover:translate-x-2 max-md:flex-col max-md:items-start">
 									<div>
 										<h4 class="mb-1 text-white/90 text-[0.95rem] font-normal">{activity.name}</h4>
 										<p class="text-white/35 text-xs tracking-[0.04em]">{new Date(activity.start_date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
 									</div>
 									<div class="flex gap-8 text-sm max-md:w-full max-md:justify-between">
-										<span class="text-strava font-normal">{formatDistance(activity.distance)} km</span>
+										<span class="text-detroit-primary font-normal">{formatDistance(activity.distance)} km</span>
 										<span class="text-white/50">{formatTime(activity.moving_time)}</span>
 										<span class="text-white/35">{formatPace(activity.average_pace)}</span>
 									</div>
@@ -513,7 +513,7 @@
 		clip-path: polygon(0 0, calc(100% - 50px) 0, 100% 50px, 100% 100%, 0 100%);
 	}
 
-	/* Strava section gradient borders */
+	/* Strava section gradient borders - using primary cyan color */
 	.strava-section::before {
 		content: '';
 		position: absolute;
@@ -521,7 +521,7 @@
 		left: 35px;
 		right: 35px;
 		height: 3px;
-		background: linear-gradient(90deg, transparent 0%, #fc4c02 20%, #fc4c02 60%, #f28d1d 80%, transparent 100%);
+		background: linear-gradient(90deg, transparent 0%, #00d4ff 20%, #00d4ff 60%, #00a8cc 80%, transparent 100%);
 	}
 
 	.strava-section::after {
@@ -531,10 +531,10 @@
 		left: 35px;
 		right: 35px;
 		height: 3px;
-		background: linear-gradient(90deg, transparent 0%, #f28d1d 20%, #fc4c02 40%, #fc4c02 80%, transparent 100%);
+		background: linear-gradient(90deg, transparent 0%, #00a8cc 20%, #00d4ff 40%, #00d4ff 80%, transparent 100%);
 	}
 
-	/* Activity item left border */
+	/* Activity item left border - using primary cyan color */
 	.activity-item::before {
 		content: '';
 		position: absolute;
@@ -542,7 +542,7 @@
 		top: 0;
 		bottom: 25px;
 		width: 4px;
-		background: linear-gradient(180deg, #fc4c02 0%, #fc4c02 50%, #f28d1d 80%, transparent 100%);
+		background: linear-gradient(180deg, #00d4ff 0%, #00d4ff 50%, #00a8cc 80%, transparent 100%);
 	}
 
 	/* Company logo placeholder gradient */
@@ -550,7 +550,7 @@
 		background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 136, 170, 0.2) 100%);
 	}
 
-	/* Stat card top border */
+	/* Stat card top border - using primary cyan color */
 	.stat-card::before {
 		content: '';
 		position: absolute;
@@ -558,7 +558,7 @@
 		left: 15px;
 		right: 15px;
 		height: 2px;
-		background: linear-gradient(90deg, transparent, rgba(252, 76, 2, 0.5), #fc4c02, rgba(252, 76, 2, 0.5), transparent);
+		background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), #00d4ff, rgba(0, 212, 255, 0.5), transparent);
 	}
 
 	/* Mobile adjustments */
