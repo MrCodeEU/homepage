@@ -90,10 +90,16 @@ jobs:
           echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$(echo ${{ steps.meta.outputs.tags }} | head -n1 | cut -d':' -f2)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-      - name: Trigger deployment webhook (optional)
-        if: success() && github.ref == 'refs/heads/main' && vars.DEPLOY_WEBHOOK_URL != ''
+      - name: Trigger homelab deployment
+        if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
+          echo "🚀 Triggering homelab deployment..."
           curl -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"source": "github-actions", "action": "docker-update", "tag": "latest", "timestamp": "'$(date -u +%s)'"}' \
-            ${{ vars.DEPLOY_WEBHOOK_URL }} || true
+            -H "Authorization: token ${{ secrets.DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/MrCodeEU/homelab-automation/dispatches \
+            -d '{"event_type": "service-update", "client_payload": {"service": "homepage", "tag": "latest", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}}' \
+          && echo "✅ Deployment triggered successfully" \
+          || echo "⚠️ Failed to trigger deployment (check DISPATCH_TOKEN secret)"
+
+

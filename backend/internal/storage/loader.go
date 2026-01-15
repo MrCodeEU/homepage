@@ -18,7 +18,7 @@ import (
 const (
 	generatedDataDir       = "./data/generated"
 	defaultRefreshInterval = 4 * time.Hour
-	githubRawBaseURL       = "https://raw.githubusercontent.com/MrCodeEU/homepage/main/data/generated"
+	githubRawBaseURL       = "https://raw.githubusercontent.com/MrCodeEU/homepage/refs/heads/main/backend/data/generated"
 )
 
 // DataLoader loads pre-generated data files and supports auto-refresh from GitHub
