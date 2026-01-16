@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-15T06:44:43.50843595Z",
+  "generated_at": "2026-01-16T06:45:17.033460018Z",
   "source": "github",
   "version": "1.0.0",
   "data": [
@@ -52,7 +52,9 @@
       "stars": 0,
       "language": "Go",
       "topics": [],
-      "images": [],
+      "images": [
+        "https://raw.githubusercontent.com/mrcodeeu/nightscout-tray/main/docs/screenshot.png"
+      ],
       "featured": false
     }
   ]
