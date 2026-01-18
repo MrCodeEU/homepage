@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-17T06:40:12.23255297Z",
+  "generated_at": "2026-01-18T06:41:11.531383754Z",
   "source": "github",
   "version": "1.0.0",
   "data": [
@@ -12,6 +12,38 @@
       "topics": [],
       "images": [],
       "featured": false
+    },
+    {
+      "name": "nightscout-display",
+      "description": "",
+      "url": "https://github.com/MrCodeEU/nightscout-display",
+      "stars": 0,
+      "language": "TypeScript",
+      "topics": [],
+      "images": [
+        "https://img.shields.io/github/v/release/yourusername/nightscout-display?style=flat-square",
+        "https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square",
+        "https://raw.githubusercontent.com/mrcodeeu/nightscout-display/main/assets/number.png",
+        "https://raw.githubusercontent.com/mrcodeeu/nightscout-display/main/assets/graph.png"
+      ],
+      "featured": false
+    },
+    {
+      "name": "nightscout-librelink-up-go",
+      "description": "Lightweight Go service that syncs glucose data from Abbott's LibreLink Up to Nightscout CGM platform. Runs as a containerized microservice with automatic data polling and real-time updates.",
+      "url": "https://github.com/MrCodeEU/nightscout-librelink-up-go",
+      "stars": 0,
+      "language": "Go",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/nightscout/800/400",
+        "https://picsum.photos/seed/librelink/600/400",
+        "https://img.shields.io/github/actions/workflow/status/mrcodeeu/nightscout-librelink-up-go/build-and-publish.yml?branch=main",
+        "https://img.shields.io/badge/docker-ghcr.io-blue",
+        "https://img.shields.io/github/license/mrcodeeu/nightscout-librelink-up-go",
+        "https://img.shields.io/github/go-mod/go-version/mrcodeeu/nightscout-librelink-up-go"
+      ],
+      "featured": true
     }
   ]
 }
