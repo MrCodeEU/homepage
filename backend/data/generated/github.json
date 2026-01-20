@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-20T06:48:56.406406959Z",
+  "generated_at": "2026-01-20T13:26:56.45614813Z",
   "source": "github",
   "version": "1.0.0",
   "data": [
@@ -37,11 +37,7 @@
       "topics": [],
       "images": [
         "https://picsum.photos/seed/nightscout/800/400",
-        "https://picsum.photos/seed/librelink/600/400",
-        "https://img.shields.io/github/actions/workflow/status/mrcodeeu/nightscout-librelink-up-go/build-and-publish.yml?branch=main",
-        "https://img.shields.io/badge/docker-ghcr.io-blue",
-        "https://img.shields.io/github/license/mrcodeeu/nightscout-librelink-up-go",
-        "https://img.shields.io/github/go-mod/go-version/mrcodeeu/nightscout-librelink-up-go"
+        "https://picsum.photos/seed/librelink/600/400"
       ],
       "featured": true
     }
