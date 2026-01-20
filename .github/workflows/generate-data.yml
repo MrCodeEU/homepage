@@ -32,6 +32,14 @@ jobs:
         with:
           go-version: '1.24'
 
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: backend/.cache
+          key: homepage-scraper-cache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            homepage-scraper-cache-${{ runner.os }}-
+
       - name: Determine sources to generate
         id: sources
         run: |

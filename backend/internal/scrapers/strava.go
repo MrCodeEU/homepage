@@ -63,18 +63,18 @@ type tokenResponse struct {
 
 // stravaActivity represents activity from Strava API
 type stravaActivity struct {
-	ID                   int64   `json:"id"`
-	Name                 string  `json:"name"`
-	Distance             float64 `json:"distance"`
-	MovingTime           int     `json:"moving_time"`
-	ElapsedTime          int     `json:"elapsed_time"`
-	TotalElevationGain   float64 `json:"total_elevation_gain"`
-	Type                 string  `json:"type"`
-	StartDate            string  `json:"start_date"`
-	AverageSpeed         float64 `json:"average_speed"`
-	MaxSpeed             float64 `json:"max_speed"`
-	AverageHeartrate     float64 `json:"average_heartrate"`
-	MaxHeartrate         float64 `json:"max_heartrate"`
+	ID                 int64   `json:"id"`
+	Name               string  `json:"name"`
+	Distance           float64 `json:"distance"`
+	MovingTime         float64 `json:"moving_time"`
+	ElapsedTime        float64 `json:"elapsed_time"`
+	TotalElevationGain float64 `json:"total_elevation_gain"`
+	Type               string  `json:"type"`
+	StartDate          string  `json:"start_date"`
+	AverageSpeed       float64 `json:"average_speed"`
+	MaxSpeed           float64 `json:"max_speed"`
+	AverageHeartrate   float64 `json:"average_heartrate"`
+	MaxHeartrate       float64 `json:"max_heartrate"`
 }
 
 // stravaStats represents athlete stats from Strava API
@@ -82,15 +82,15 @@ type stravaStats struct {
 	AllRunTotals struct {
 		Count         int     `json:"count"`
 		Distance      float64 `json:"distance"`
-		MovingTime    int     `json:"moving_time"`
-		ElapsedTime   int     `json:"elapsed_time"`
+		MovingTime    float64 `json:"moving_time"`
+		ElapsedTime   float64 `json:"elapsed_time"`
 		ElevationGain float64 `json:"elevation_gain"`
 	} `json:"all_run_totals"`
 	YTDRunTotals struct {
 		Count         int     `json:"count"`
 		Distance      float64 `json:"distance"`
-		MovingTime    int     `json:"moving_time"`
-		ElapsedTime   int     `json:"elapsed_time"`
+		MovingTime    float64 `json:"moving_time"`
+		ElapsedTime   float64 `json:"elapsed_time"`
 		ElevationGain float64 `json:"elevation_gain"`
 	} `json:"ytd_run_totals"`
 }
@@ -149,15 +149,15 @@ func (s *StravaScraper) Scrape() (any, error) {
 		TotalStats: models.StravaStats{
 			Count:         stats.AllRunTotals.Count,
 			Distance:      stats.AllRunTotals.Distance,
-			MovingTime:    stats.AllRunTotals.MovingTime,
-			ElapsedTime:   stats.AllRunTotals.ElapsedTime,
+			MovingTime:    int(stats.AllRunTotals.MovingTime),
+			ElapsedTime:   int(stats.AllRunTotals.ElapsedTime),
 			ElevationGain: stats.AllRunTotals.ElevationGain,
 		},
 		YearToDateStats: models.StravaStats{
 			Count:         stats.YTDRunTotals.Count,
 			Distance:      stats.YTDRunTotals.Distance,
-			MovingTime:    stats.YTDRunTotals.MovingTime,
-			ElapsedTime:   stats.YTDRunTotals.ElapsedTime,
+			MovingTime:    int(stats.YTDRunTotals.MovingTime),
+			ElapsedTime:   int(stats.YTDRunTotals.ElapsedTime),
 			ElevationGain: stats.YTDRunTotals.ElevationGain,
 		},
 		RecentActivities: recentActivities,
@@ -212,7 +212,11 @@ func (s *StravaScraper) ensureAccessToken() error {
 	if err != nil {
 		return fmt.Errorf("failed to exchange token: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -250,7 +254,11 @@ func (s *StravaScraper) fetchAthleteStats() (*stravaStats, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch athlete: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -336,8 +344,8 @@ func (s *StravaScraper) filterRunningActivities(activities []stravaActivity) []m
 				ID:                 activity.ID,
 				Name:               activity.Name,
 				Distance:           activity.Distance,
-				MovingTime:         activity.MovingTime,
-				ElapsedTime:        activity.ElapsedTime,
+				MovingTime:         int(activity.MovingTime),
+				ElapsedTime:        int(activity.ElapsedTime),
 				TotalElevationGain: activity.TotalElevationGain,
 				Type:               activity.Type,
 				StartDate:          startDate,

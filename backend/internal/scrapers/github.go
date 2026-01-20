@@ -135,13 +135,18 @@ func (g *GitHubScraper) Scrape() (any, error) {
 		// Check for portfolio marker
 		hasMarker, metadata, err := g.checkPortfolioMarker(repo.Name)
 		if err != nil {
-			// Log error but continue
+			// Log error with context but continue to next repo
+			log.Printf("Warning: Failed to check portfolio marker for %s: %v", repo.Name, err)
 			continue
 		}
 
 		if !hasMarker {
 			continue
 		}
+
+		// Log found portfolio repo
+		log.Printf("Found portfolio repo: %s (featured: %v, %d images in metadata)",
+			repo.Name, metadata.Featured, len(metadata.Images))
 
 		// Build project
 		project := Project{
@@ -170,14 +175,17 @@ func (g *GitHubScraper) Scrape() (any, error) {
 		// Try to extract images from README
 		readmeImages, err := g.extractImagesFromREADME(repo.Name)
 		if err == nil {
+			log.Printf("  Found %d images in README of %s", len(readmeImages), repo.Name)
 			images = append(images, readmeImages...)
 		}
 
 		project.Images = deduplicateStrings(images)
+		log.Printf("  Total unique images for %s: %d", repo.Name, len(project.Images))
 
 		projects = append(projects, project)
 	}
 
+	log.Printf("Total portfolio projects found: %d", len(projects))
 	return projects, nil
 }
 
@@ -251,15 +259,19 @@ func (g *GitHubScraper) checkPortfolioMarker(repoName string) (bool, PortfolioMe
 		// Parse .portfolio JSON
 		var metadata PortfolioMetadata
 		if unmarshalErr := json.Unmarshal([]byte(content), &metadata); unmarshalErr != nil {
+			log.Printf("Warning: Invalid .portfolio JSON in %s: %v", repoName, unmarshalErr)
+			// Invalid JSON in .portfolio is a real error we should report
 			return false, PortfolioMetadata{}, fmt.Errorf("invalid .portfolio file: %w", unmarshalErr)
 		}
 		return true, metadata, nil
 	}
 
 	// If .portfolio doesn't exist, check README for marker
-	readme, err := g.fetchREADME(repoName)
-	if err != nil {
-		return false, PortfolioMetadata{}, err
+	readme, readmeErr := g.fetchREADME(repoName)
+	if readmeErr != nil {
+		// If both .portfolio and README don't exist or can't be fetched,
+		// this repo simply doesn't have a portfolio marker - not an error
+		return false, PortfolioMetadata{}, nil
 	}
 
 	// Check for <!-- PORTFOLIO --> comment or 🎨 emoji

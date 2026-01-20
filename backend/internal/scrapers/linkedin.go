@@ -84,7 +84,11 @@ func downloadImageAsBase64(imageURL string) string {
 		log.Printf("Failed to download image %s: %v", imageURL, err)
 		return ""
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Failed to download image %s: status %d", imageURL, resp.StatusCode)
@@ -174,22 +178,27 @@ func (l *LinkedInScraper) Scrape() (any, error) {
 			_ = chromedp.Run(ctx, chromedp.Location(&currentURL))
 			if !strings.Contains(currentURL, "login") && !strings.Contains(currentURL, "checkpoint") {
 				log.Println("Cookie session is valid, skipping login...")
-				goto extractData
+				// Navigate to profile and extract data
+				data, err := l.extractProfileData(ctx)
+				if err != nil {
+					return nil, fmt.Errorf("failed to extract profile data: %w", err)
+				}
+				log.Println("Profile data extracted successfully")
+				return data, nil
 			}
 		}
 		log.Println("Cookie session expired or invalid, performing fresh login...")
 	}
 
-	// Login to LinkedIn
+	// Perform login
 	if err := l.login(ctx); err != nil {
 		return nil, fmt.Errorf("login failed: %w", err)
 	}
+	log.Println("Login successful")
 
-	log.Println("Login successful, saving cookies...")
 	// Save cookies for future use
 	l.saveCookies(ctx)
 
-extractData:
 	log.Println("Navigating to profile...")
 
 	// Navigate to profile and extract data
@@ -1094,47 +1103,6 @@ func (l *LinkedInScraper) extractSkills(ctx context.Context, data *models.Linked
 	}
 
 	return nil
-}
-
-// parseDateRange parses LinkedIn date ranges like "Jan 2020 - Present · 4 yrs"
-func parseDateRange(dateRange string) (startDate, endDate, duration string) {
-	dateRange = strings.TrimSpace(dateRange)
-
-	// Split by · to separate dates from duration
-	parts := strings.Split(dateRange, " · ")
-	if len(parts) >= 2 {
-		duration = strings.TrimSpace(parts[1])
-	}
-
-	// Parse the date part
-	datePart := parts[0]
-	if strings.Contains(datePart, " - ") {
-		dates := strings.Split(datePart, " - ")
-		if len(dates) >= 1 {
-			startDate = strings.TrimSpace(dates[0])
-		}
-		if len(dates) >= 2 {
-			endDate = strings.TrimSpace(dates[1])
-		}
-	} else if strings.Contains(datePart, " – ") { // Different dash character
-		dates := strings.Split(datePart, " – ")
-		if len(dates) >= 1 {
-			startDate = strings.TrimSpace(dates[0])
-		}
-		if len(dates) >= 2 {
-			endDate = strings.TrimSpace(dates[1])
-		}
-	} else {
-		// Single date, might be just years
-		startDate = datePart
-	}
-
-	// Normalize "Present" variations
-	if strings.EqualFold(endDate, "present") || endDate == "" {
-		endDate = "Present"
-	}
-
-	return
 }
 
 // germanMonthMap maps German month abbreviations to month numbers
