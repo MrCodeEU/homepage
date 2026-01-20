@@ -96,10 +96,11 @@ jobs:
 
           git push
 
-      - name: Trigger deployment webhook (optional)
-        if: success() && vars.DEPLOY_WEBHOOK_URL != ''
+        # Disable this step for now by setting condition to false
+      - name: Trigger deployment webhook
+        if: success() && steps.sources.outputs.sources != 'none' && false
         run: |
           curl -X POST \
             -H "Content-Type: application/json" \
             -d '{"source": "github-actions", "action": "data-update", "timestamp": "'$(date -u +%s)'"}' \
-            ${{ vars.DEPLOY_WEBHOOK_URL }} || true
+            ${{ secrets.DEPLOY_WEBHOOK_URL }} || true
