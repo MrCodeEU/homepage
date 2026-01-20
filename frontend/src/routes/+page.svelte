@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { getLinkedInData, getProjects, getStravaData, type LinkedInData, type Project, type StravaData, type ProjectLink } from '$lib/api';
+	import { getLinkedInData, getProjects, getStravaData, type LinkedInData, type Project, type StravaData } from '$lib/api';
 	import { LogoAnimation, ImageCarousel } from '$lib/components';
 	import logoSvg from '$lib/assets/logo.svg?raw';
 
