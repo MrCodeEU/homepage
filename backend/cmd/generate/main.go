@@ -16,12 +16,14 @@ import (
 )
 
 const (
-	dataDir    = "./data/generated"
-	appVersion = "1.0.0"
+	dataDir     = "./data/generated"
+	cacheDir    = "./.cache"
+	appVersion  = "1.0.0"
 )
 
 var (
 	outputDir = flag.String("output", dataDir, "Output directory for generated data files")
+	cachePath = flag.String("cache", cacheDir, "Cache directory for cookies and temporary data")
 	sources   = flag.String("sources", "all", "Data sources to generate (all, github, strava, linkedin)")
 	verbose   = flag.Bool("verbose", false, "Enable verbose logging")
 )
@@ -45,17 +47,20 @@ func main() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Initialize cache (temporary, for scraper compatibility)
-	tempCacheDir := filepath.Join(os.TempDir(), "homepage-generate-cache")
-	cache, err := storage.NewFileCache(tempCacheDir)
+	// Initialize persistent cache directory
+	persistentCacheDir := *cachePath
+	if err := os.MkdirAll(persistentCacheDir, 0755); err != nil {
+		log.Fatalf("Failed to create cache directory: %v", err)
+	}
+
+	cache, err := storage.NewFileCache(persistentCacheDir)
 	if err != nil {
 		log.Fatalf("Failed to create cache: %v", err)
 	}
-	defer func() {
-		if err := os.RemoveAll(tempCacheDir); err != nil {
-			log.Printf("Warning: failed to clean up temp cache: %v", err)
-		}
-	}()
+
+	if *verbose {
+		log.Printf("Using cache directory: %s", persistentCacheDir)
+	}
 
 	// Track which sources to generate
 	generateAll := *sources == "all"
@@ -65,10 +70,14 @@ func main() {
 		"linkedin": generateAll || *sources == "linkedin",
 	}
 
+	// Track errors
+	hasErrors := false
+
 	// Generate GitHub data
 	if shouldGenerate["github"] {
 		if err := generateGitHub(cfg, cache, *outputDir); err != nil {
 			log.Printf("Error generating GitHub data: %v", err)
+			hasErrors = true
 		} else if *verbose {
 			log.Println("✓ GitHub data generated successfully")
 		}
@@ -78,6 +87,7 @@ func main() {
 	if shouldGenerate["strava"] {
 		if err := generateStrava(cfg, cache, *outputDir); err != nil {
 			log.Printf("Error generating Strava data: %v", err)
+			hasErrors = true
 		} else if *verbose {
 			log.Println("✓ Strava data generated successfully")
 		}
@@ -87,6 +97,7 @@ func main() {
 	if shouldGenerate["linkedin"] {
 		if err := generateLinkedIn(cfg, cache, *outputDir); err != nil {
 			log.Printf("Error generating LinkedIn data: %v", err)
+			hasErrors = true
 		} else if *verbose {
 			log.Println("✓ LinkedIn data generated successfully")
 		}
@@ -94,6 +105,12 @@ func main() {
 
 	if *verbose {
 		log.Println("Data generation completed!")
+	}
+
+	// Exit with error code if any generation failed
+	if hasErrors {
+		log.Println("Data generation completed with errors")
+		os.Exit(1)
 	}
 }
 

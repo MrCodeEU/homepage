@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 	"github.com/mrcodeeu/homepage/internal/models"
 	"github.com/mrcodeeu/homepage/internal/storage"
@@ -16,9 +17,10 @@ import (
 )
 
 const (
-	cacheKeyLinkedIn   = "linkedin_data"
-	linkedInLoginURL   = "https://www.linkedin.com/login"
-	linkedInTimeoutSec = 120
+	cacheKeyLinkedIn        = "linkedin_data"
+	cacheKeyLinkedInCookies = "linkedin_cookies"
+	linkedInLoginURL        = "https://www.linkedin.com/login"
+	linkedInTimeoutSec      = 120
 )
 
 // LinkedInScraper implements the Scraper interface for LinkedIn profiles using chromedp
@@ -96,12 +98,38 @@ func (l *LinkedInScraper) Scrape() (any, error) {
 	ctx, cancel = context.WithTimeout(ctx, linkedInTimeoutSec*time.Second)
 	defer cancel()
 
-	// Login to LinkedIn
-	if err := l.login(ctx); err != nil {
-		return nil, fmt.Errorf("login failed: %w", err)
+	// Try to restore cookies and check if already logged in
+	cookiesRestored, err := l.restoreCookies(ctx)
+	if err != nil {
+		log.Printf("Warning: Failed to restore cookies: %v", err)
 	}
 
-	log.Println("Login successful, navigating to profile...")
+	// Check if we're already logged in
+	loggedIn := false
+	if cookiesRestored {
+		log.Println("Checking if already logged in with cached cookies...")
+		loggedIn = l.isLoggedIn(ctx)
+		if loggedIn {
+			log.Println("Already logged in with cached cookies!")
+		} else {
+			log.Println("Cached cookies expired or invalid, will perform fresh login")
+		}
+	}
+
+	// Login if not already logged in
+	if !loggedIn {
+		if err := l.login(ctx); err != nil {
+			return nil, fmt.Errorf("login failed: %w", err)
+		}
+		log.Println("Login successful")
+
+		// Save cookies for future use
+		if err := l.saveCookies(ctx); err != nil {
+			log.Printf("Warning: Failed to save cookies: %v", err)
+		}
+	}
+
+	log.Println("Navigating to profile...")
 
 	// Navigate to profile and extract data
 	data, err := l.extractProfileData(ctx)
@@ -1081,4 +1109,101 @@ func ExtractProfileURLUsername(url string) string {
 		return matches[1]
 	}
 	return ""
+}
+
+// saveCookies saves the current browser cookies to cache
+func (l *LinkedInScraper) saveCookies(ctx context.Context) error {
+	var cookies []*network.Cookie
+	if err := chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+		c, err := network.GetCookies().Do(ctx)
+		if err != nil {
+			return err
+		}
+		cookies = c
+		return nil
+	})); err != nil {
+		return fmt.Errorf("failed to get cookies: %w", err)
+	}
+
+	data, err := json.Marshal(cookies)
+	if err != nil {
+		return fmt.Errorf("failed to marshal cookies: %w", err)
+	}
+
+	// Store cookies with 7 day TTL (longer than data cache)
+	if err := l.cache.Set(cacheKeyLinkedInCookies, data, 7*24*time.Hour); err != nil {
+		return fmt.Errorf("failed to save cookies: %w", err)
+	}
+
+	log.Printf("Saved %d LinkedIn cookies to cache", len(cookies))
+	return nil
+}
+
+// restoreCookies restores cookies from cache to the browser
+func (l *LinkedInScraper) restoreCookies(ctx context.Context) (bool, error) {
+	cached, err := l.cache.Get(cacheKeyLinkedInCookies)
+	if err != nil {
+		return false, fmt.Errorf("cache error: %w", err)
+	}
+
+	if cached == nil {
+		log.Println("No cached LinkedIn cookies found")
+		return false, nil
+	}
+
+	var cookies []*network.Cookie
+	if err := json.Unmarshal(cached, &cookies); err != nil {
+		log.Printf("Warning: Failed to unmarshal cached cookies: %v", err)
+		return false, nil
+	}
+
+	// Set cookies
+	if err := chromedp.Run(ctx, chromedp.ActionFunc(func(ctx context.Context) error {
+		for _, cookie := range cookies {
+			// Only restore valid cookies (not expired)
+			if cookie.Expires > 0 && time.Unix(int64(cookie.Expires), 0).Before(time.Now()) {
+				continue
+			}
+			
+			// Set cookie - note: we don't set Expires as the cookie already has its expiration
+			// and the type conversion is complex
+			if err := network.SetCookie(cookie.Name, cookie.Value).
+				WithDomain(cookie.Domain).
+				WithPath(cookie.Path).
+				WithHTTPOnly(cookie.HTTPOnly).
+				WithSecure(cookie.Secure).
+				Do(ctx); err != nil {
+				return err
+			}
+		}
+		return nil
+	})); err != nil {
+		return false, fmt.Errorf("failed to restore cookies: %w", err)
+	}
+
+	log.Printf("Restored %d LinkedIn cookies from cache", len(cookies))
+	return true, nil
+}
+
+// isLoggedIn checks if we're already logged in to LinkedIn
+func (l *LinkedInScraper) isLoggedIn(ctx context.Context) bool {
+	var currentURL string
+	if err := chromedp.Run(ctx, chromedp.Location(&currentURL)); err != nil {
+		return false
+	}
+
+	// If we're not on login page and cookies are present, we're likely logged in
+	if !strings.Contains(currentURL, "login") && !strings.Contains(currentURL, "authwall") {
+		// Try to access a page that requires login
+		var feedExists bool
+		if err := chromedp.Run(ctx,
+			chromedp.Navigate("https://www.linkedin.com/feed/"),
+			chromedp.WaitVisible("div[role='main']", chromedp.ByQuery),
+		); err == nil {
+			feedExists = true
+		}
+		return feedExists
+	}
+
+	return false
 }

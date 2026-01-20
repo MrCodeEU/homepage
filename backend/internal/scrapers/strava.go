@@ -66,8 +66,8 @@ type stravaActivity struct {
 	ID                   int64   `json:"id"`
 	Name                 string  `json:"name"`
 	Distance             float64 `json:"distance"`
-	MovingTime           int     `json:"moving_time"`
-	ElapsedTime          int     `json:"elapsed_time"`
+	MovingTime           float64 `json:"moving_time"`
+	ElapsedTime          float64 `json:"elapsed_time"`
 	TotalElevationGain   float64 `json:"total_elevation_gain"`
 	Type                 string  `json:"type"`
 	StartDate            string  `json:"start_date"`
@@ -82,15 +82,15 @@ type stravaStats struct {
 	AllRunTotals struct {
 		Count         int     `json:"count"`
 		Distance      float64 `json:"distance"`
-		MovingTime    int     `json:"moving_time"`
-		ElapsedTime   int     `json:"elapsed_time"`
+		MovingTime    float64 `json:"moving_time"`
+		ElapsedTime   float64 `json:"elapsed_time"`
 		ElevationGain float64 `json:"elevation_gain"`
 	} `json:"all_run_totals"`
 	YTDRunTotals struct {
 		Count         int     `json:"count"`
 		Distance      float64 `json:"distance"`
-		MovingTime    int     `json:"moving_time"`
-		ElapsedTime   int     `json:"elapsed_time"`
+		MovingTime    float64 `json:"moving_time"`
+		ElapsedTime   float64 `json:"elapsed_time"`
 		ElevationGain float64 `json:"elevation_gain"`
 	} `json:"ytd_run_totals"`
 }
@@ -149,15 +149,15 @@ func (s *StravaScraper) Scrape() (any, error) {
 		TotalStats: models.StravaStats{
 			Count:         stats.AllRunTotals.Count,
 			Distance:      stats.AllRunTotals.Distance,
-			MovingTime:    stats.AllRunTotals.MovingTime,
-			ElapsedTime:   stats.AllRunTotals.ElapsedTime,
+			MovingTime:    int(stats.AllRunTotals.MovingTime),
+			ElapsedTime:   int(stats.AllRunTotals.ElapsedTime),
 			ElevationGain: stats.AllRunTotals.ElevationGain,
 		},
 		YearToDateStats: models.StravaStats{
 			Count:         stats.YTDRunTotals.Count,
 			Distance:      stats.YTDRunTotals.Distance,
-			MovingTime:    stats.YTDRunTotals.MovingTime,
-			ElapsedTime:   stats.YTDRunTotals.ElapsedTime,
+			MovingTime:    int(stats.YTDRunTotals.MovingTime),
+			ElapsedTime:   int(stats.YTDRunTotals.ElapsedTime),
 			ElevationGain: stats.YTDRunTotals.ElevationGain,
 		},
 		RecentActivities: recentActivities,
@@ -336,8 +336,8 @@ func (s *StravaScraper) filterRunningActivities(activities []stravaActivity) []m
 				ID:                 activity.ID,
 				Name:               activity.Name,
 				Distance:           activity.Distance,
-				MovingTime:         activity.MovingTime,
-				ElapsedTime:        activity.ElapsedTime,
+				MovingTime:         int(activity.MovingTime),
+				ElapsedTime:        int(activity.ElapsedTime),
 				TotalElevationGain: activity.TotalElevationGain,
 				Type:               activity.Type,
 				StartDate:          startDate,
