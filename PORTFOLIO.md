@@ -19,6 +19,10 @@ Create a `.portfolio` file in the root of your repository with the following JSO
     "screenshots/demo.png",
     "./assets/logo.svg",
     "https://example.com/external-image.jpg"
+  ],
+  "links": [
+    {"name": "Live", "url": "https://myproject.com"},
+    {"name": "Staging", "url": "https://staging.myproject.com"}
   ]
 }
 ```
@@ -29,6 +33,7 @@ Create a `.portfolio` file in the root of your repository with the following JSO
 - **featured** (optional): Set to `true` to mark this as a featured project
 - **tags** (optional): Array of tags to categorize the project (merged with GitHub topics)
 - **images** (optional): Array of image URLs or paths (see Image Handling below)
+- **links** (optional): Array of custom links to display alongside the GitHub link (see Links below)
 
 ### Image Handling
 
@@ -62,6 +67,60 @@ The `images` array supports three types of image references:
    ```
    These are used as-is without modification.
 
+### Links
+
+The `links` array allows you to add custom buttons that appear alongside the GitHub link on project cards:
+
+```json
+"links": [
+  {"name": "Live", "url": "https://myproject.com"},
+  {"name": "Staging", "url": "https://staging.myproject.com"},
+  {"name": "Docs", "url": "https://docs.myproject.com"}
+]
+```
+
+Each link object has:
+- **name**: Display text for the button (also determines the icon if no custom icon specified)
+- **url**: The URL to link to
+- **icon** (optional): Custom icon name (e.g., `"mdi:rocket-launch"`)
+
+**Custom Icons:**
+
+You can specify a custom icon using the `icon` field:
+
+```json
+"links": [
+  {"name": "Launch", "url": "https://app.example.com", "icon": "mdi:rocket-launch"},
+  {"name": "API", "url": "https://api.example.com", "icon": "mdi:api"}
+]
+```
+
+Supported custom icon names:
+- `rocket-launch` or `rocket` - Rocket icon
+- `api` - API/menu icon
+- `download` - Download icon
+- `globe` - World/globe icon
+- `flask` - Test tube/flask icon
+- `book` - Book/documentation icon
+- `play` - Play button icon
+- `link` - Generic link icon
+
+**Automatic Icon Detection (Fallback):**
+
+If no custom icon is specified, icons are automatically assigned based on keywords in the link name:
+
+| Keyword in name | Icon |
+|-----------------|------|
+| `live`, `prod` | Globe (world icon) |
+| `staging`, `dev`, `test` | Flask (test tube) |
+| `docs`, `documentation` | Book |
+| `demo` | Play button |
+| `api` | API/menu icon |
+| `download` | Download icon |
+| Other | Generic link icon |
+
+The GitHub link is always shown automatically - you don't need to add it to the links array.
+
 ### Complete Example
 
 ```json
@@ -71,8 +130,12 @@ The `images` array supports three types of image references:
   "tags": ["ansible", "docker", "automation", "devops", "infrastructure"],
   "images": [
     "docs/screenshots/dashboard.png",
-    "./assets/architecture-diagram.svg",
-    "https://img.shields.io/badge/status-active-success"
+    "./assets/architecture-diagram.svg"
+  ],
+  "links": [
+    {"name": "Live", "url": "https://myproject.com"},
+    {"name": "Staging", "url": "https://dev.myproject.com"},
+    {"name": "Docs", "url": "https://docs.myproject.com"}
   ]
 }
 ```
@@ -109,7 +172,9 @@ When using README markers:
    - The `images` array in `.portfolio` (if present)
    - Any `![alt](url)` markdown images in the README
 5. All relative image paths are converted to absolute GitHub raw URLs
-6. Duplicate images are removed
+6. Badge images (shields.io) are filtered out
+7. Duplicate images are removed
+8. Links from `.portfolio` are added as buttons alongside the GitHub link
 
 ## Testing Locally
 
@@ -131,6 +196,17 @@ To test your portfolio configuration locally:
    curl http://localhost:8080/api/projects | jq
    ```
 
+## Image Carousel
+
+When a project has multiple images, they are displayed in an auto-rotating carousel:
+
+- **Auto-switching**: Images rotate every 3 seconds
+- **Pause on hover**: Carousel pauses when you hover over it
+- **Manual navigation**: Arrow buttons and dot indicators for manual control
+- **Image counter**: Shows current position (e.g., "2 / 5")
+
+**Note:** Badge images from shields.io are automatically filtered out from the carousel to only show actual project screenshots.
+
 ## Image Best Practices
 
 1. **Use local images for privacy**: Store screenshots and project images in your repo rather than external services
@@ -138,6 +214,7 @@ To test your portfolio configuration locally:
 3. **Optimize sizes**: Keep images reasonably sized (< 500KB) for faster loading
 4. **Use descriptive names**: `feature-dashboard.png` is better than `img1.png`
 5. **Supported formats**: PNG, JPG, GIF, SVG, WebP
+6. **Avoid badges in images array**: Shield.io badges are auto-filtered, but it's cleaner to only include actual screenshots
 
 ## Example Directory Structure
 

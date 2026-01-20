@@ -1,5 +1,8 @@
 {
   "featured": true,
   "description": "Personal homepage with automated data aggregation",
-  "tags": ["golang", "svelte", "automation"]
+  "tags": ["golang", "svelte", "automation"],
+  "links": [
+    {"name": "Live", "url": "https://mljr.eu"}
+  ]
 }

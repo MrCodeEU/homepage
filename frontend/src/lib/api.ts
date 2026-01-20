@@ -65,6 +65,12 @@ export interface Education {
 }
 
 // GitHub Projects
+export interface ProjectLink {
+	name: string;
+	url: string;
+	icon?: string; // Optional Material Design icon name (e.g., "mdi:rocket-launch")
+}
+
 export interface Project {
 	name: string;
 	description: string;
@@ -74,6 +80,7 @@ export interface Project {
 	topics: string[];
 	images: string[];
 	featured: boolean;
+	links: ProjectLink[];
 }
 
 // Strava Data

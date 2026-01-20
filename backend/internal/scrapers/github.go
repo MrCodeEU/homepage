@@ -64,24 +64,33 @@ func (g *GitHubScraper) Name() string {
 	return "github"
 }
 
+// ProjectLink represents a custom link for a project
+type ProjectLink struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+	Icon string `json:"icon,omitempty"` // Optional Material Design icon name (e.g., "mdi:rocket-launch")
+}
+
 // Project represents a GitHub project
 type Project struct {
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	URL         string   `json:"url"`
-	Stars       int      `json:"stars"`
-	Language    string   `json:"language"`
-	Topics      []string `json:"topics"`
-	Images      []string `json:"images"`
-	Featured    bool     `json:"featured"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	URL         string        `json:"url"`
+	Stars       int           `json:"stars"`
+	Language    string        `json:"language"`
+	Topics      []string      `json:"topics"`
+	Images      []string      `json:"images"`
+	Featured    bool          `json:"featured"`
+	Links       []ProjectLink `json:"links"`
 }
 
 // PortfolioMetadata represents .portfolio file content
 type PortfolioMetadata struct {
-	Description string   `json:"description,omitempty"`
-	Images      []string `json:"images,omitempty"`
-	Featured    bool     `json:"featured,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
+	Description string        `json:"description,omitempty"`
+	Images      []string      `json:"images,omitempty"`
+	Featured    bool          `json:"featured,omitempty"`
+	Tags        []string      `json:"tags,omitempty"`
+	Links       []ProjectLink `json:"links,omitempty"`
 }
 
 // GitHubRepo represents a GitHub repository from the API
@@ -165,6 +174,7 @@ func (g *GitHubScraper) Scrape() (any, error) {
 			Language:    repo.Language,
 			Topics:      repo.Topics,
 			Featured:    metadata.Featured,
+			Links:       metadata.Links,
 		}
 
 		// Override description if provided in metadata
@@ -187,7 +197,8 @@ func (g *GitHubScraper) Scrape() (any, error) {
 			images = append(images, readmeImages...)
 		}
 
-		project.Images = deduplicateStrings(images)
+		// Filter out badge images and deduplicate
+		project.Images = filterBadgeImages(deduplicateStrings(images))
 		log.Printf("  Total unique images for %s: %d", repo.Name, len(project.Images))
 
 		projects = append(projects, project)
@@ -410,5 +421,49 @@ func deduplicateStrings(slice []string) []string {
 		}
 	}
 
+	return result
+}
+
+// isBadgeURL checks if a URL is from a known badge service by examining the domain
+func isBadgeURL(imageURL string) bool {
+	// Known badge service domains
+	badgeDomains := []string{
+		"shields.io",
+		"img.shields.io",
+		"badge.fury.io",
+		"badgen.net",
+		"codecov.io",
+		"coveralls.io",
+		"travis-ci.org",
+		"travis-ci.com",
+		"circleci.com",
+		"github.com/workflows", // GitHub Actions badges
+	}
+
+	urlLower := strings.ToLower(imageURL)
+	for _, domain := range badgeDomains {
+		// Check if the domain appears in the host portion (after :// and before the next /)
+		if strings.Contains(urlLower, "://"+domain) ||
+			strings.Contains(urlLower, "://www."+domain) {
+			return true
+		}
+		// Also check for subdomains like img.shields.io
+		if strings.Contains(urlLower, "."+domain+"/") ||
+			strings.Contains(urlLower, "."+domain+"?") ||
+			strings.HasSuffix(urlLower, "."+domain) {
+			return true
+		}
+	}
+	return false
+}
+
+// filterBadgeImages removes badge/shield images from the image list
+func filterBadgeImages(images []string) []string {
+	result := make([]string, 0, len(images))
+	for _, img := range images {
+		if !isBadgeURL(img) {
+			result = append(result, img)
+		}
+	}
 	return result
 }

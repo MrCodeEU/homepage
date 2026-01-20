@@ -164,13 +164,23 @@ Projects are auto-discovered from GitHub when they have:
   "description": "Custom description",
   "featured": true,
   "tags": ["golang", "web"],
-  "images": ["screenshots/demo.png", "https://example.com/banner.jpg"]
+  "images": ["screenshots/demo.png", "https://example.com/banner.jpg"],
+  "links": [
+    {"name": "Live", "url": "https://example.com"},
+    {"name": "Staging", "url": "https://staging.example.com"}
+  ]
 }
 ```
 
 **Option 2: README markers**
 - `<!-- PORTFOLIO -->` HTML comment
 - 🎨 emoji
+
+**Frontend Features:**
+- Image carousel with auto-switching (3s interval), pause on hover
+- Link buttons with auto-detected icons based on name (Live→globe, Staging→flask, Docs→book, Demo→play)
+- GitHub link always shown alongside custom links
+- Badge images (shields.io) are automatically filtered from carousels
 
 See PORTFOLIO.md for full documentation.
 

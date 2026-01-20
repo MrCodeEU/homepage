@@ -387,3 +387,223 @@ func TestGitHubScraper_ImplementsScraper(t *testing.T) {
 		t.Logf("Refresh failed as expected without mock server: %v", err)
 	}
 }
+
+func TestIsBadgeURL(t *testing.T) {
+	tests := []struct {
+		name     string
+		imageURL string
+		expected bool
+	}{
+		// Badge URLs that should be filtered
+		{
+			name:     "shields.io badge",
+			imageURL: "https://img.shields.io/badge/version-1.0-blue",
+			expected: true,
+		},
+		{
+			name:     "shields.io with www",
+			imageURL: "https://www.shields.io/badge/test",
+			expected: true,
+		},
+		{
+			name:     "badge.fury.io",
+			imageURL: "https://badge.fury.io/rb/rails.svg",
+			expected: true,
+		},
+		{
+			name:     "badgen.net",
+			imageURL: "https://badgen.net/badge/icon/test",
+			expected: true,
+		},
+		{
+			name:     "codecov.io",
+			imageURL: "https://codecov.io/gh/user/repo/branch/master/graph/badge.svg",
+			expected: true,
+		},
+		{
+			name:     "coveralls.io",
+			imageURL: "https://coveralls.io/repos/github/user/repo/badge.svg",
+			expected: true,
+		},
+		{
+			name:     "travis-ci.org",
+			imageURL: "https://travis-ci.org/user/repo.svg",
+			expected: true,
+		},
+		{
+			name:     "travis-ci.com",
+			imageURL: "https://travis-ci.com/user/repo.svg",
+			expected: true,
+		},
+		{
+			name:     "circleci.com",
+			imageURL: "https://circleci.com/gh/user/repo.svg",
+			expected: true,
+		},
+		{
+			name:     "GitHub Actions badge",
+			imageURL: "https://github.com/workflows/main.yml/badge.svg",
+			expected: true,
+		},
+		// Non-badge URLs that should NOT be filtered
+		{
+			name:     "regular GitHub raw image",
+			imageURL: "https://raw.githubusercontent.com/user/repo/main/screenshot.png",
+			expected: false,
+		},
+		{
+			name:     "external image URL",
+			imageURL: "https://example.com/images/demo.png",
+			expected: false,
+		},
+		{
+			name:     "image with badge in filename - should NOT be filtered",
+			imageURL: "https://raw.githubusercontent.com/user/repo/main/user-badge-system.png",
+			expected: false,
+		},
+		{
+			name:     "image with badge in path - should NOT be filtered",
+			imageURL: "https://example.com/badge-icons/logo.png",
+			expected: false,
+		},
+		{
+			name:     "picsum placeholder",
+			imageURL: "https://picsum.photos/seed/test/800/400",
+			expected: false,
+		},
+		{
+			name:     "relative path (no domain)",
+			imageURL: "screenshots/demo.png",
+			expected: false,
+		},
+		{
+			name:     "SVG from repo",
+			imageURL: "https://raw.githubusercontent.com/user/repo/main/docs/architecture.svg",
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isBadgeURL(tt.imageURL)
+			if result != tt.expected {
+				t.Errorf("isBadgeURL(%q) = %v, expected %v", tt.imageURL, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestFilterBadgeImages(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		expected []string
+	}{
+		{
+			name:     "empty slice",
+			input:    []string{},
+			expected: []string{},
+		},
+		{
+			name: "only badges - all filtered",
+			input: []string{
+				"https://img.shields.io/badge/version-1.0-blue",
+				"https://badge.fury.io/rb/rails.svg",
+			},
+			expected: []string{},
+		},
+		{
+			name: "only valid images - none filtered",
+			input: []string{
+				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
+				"https://example.com/demo.jpg",
+			},
+			expected: []string{
+				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
+				"https://example.com/demo.jpg",
+			},
+		},
+		{
+			name: "mixed - badges filtered, images kept",
+			input: []string{
+				"https://img.shields.io/badge/version-1.0-blue",
+				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
+				"https://badge.fury.io/rb/rails.svg",
+				"https://example.com/demo.jpg",
+				"https://codecov.io/gh/user/repo/badge.svg",
+			},
+			expected: []string{
+				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
+				"https://example.com/demo.jpg",
+			},
+		},
+		{
+			name: "image with badge in filename - NOT filtered",
+			input: []string{
+				"https://raw.githubusercontent.com/user/repo/main/user-badge-system.png",
+				"https://example.com/badge-icons/logo.png",
+			},
+			expected: []string{
+				"https://raw.githubusercontent.com/user/repo/main/user-badge-system.png",
+				"https://example.com/badge-icons/logo.png",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterBadgeImages(tt.input)
+			if len(result) != len(tt.expected) {
+				t.Errorf("filterBadgeImages() returned %d items, expected %d", len(result), len(tt.expected))
+				t.Errorf("  got: %v", result)
+				t.Errorf("  expected: %v", tt.expected)
+				return
+			}
+			for i, v := range result {
+				if v != tt.expected[i] {
+					t.Errorf("filterBadgeImages()[%d] = %q, expected %q", i, v, tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestProjectLink_JSON(t *testing.T) {
+	// Test with icon
+	linkWithIcon := ProjectLink{
+		Name: "Live",
+		URL:  "https://example.com",
+		Icon: "mdi:rocket-launch",
+	}
+
+	data, err := json.Marshal(linkWithIcon)
+	if err != nil {
+		t.Fatalf("Failed to marshal link with icon: %v", err)
+	}
+
+	var decoded ProjectLink
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("Failed to unmarshal link: %v", err)
+	}
+
+	if decoded.Icon != "mdi:rocket-launch" {
+		t.Errorf("Expected icon 'mdi:rocket-launch', got '%s'", decoded.Icon)
+	}
+
+	// Test without icon (omitempty)
+	linkWithoutIcon := ProjectLink{
+		Name: "Docs",
+		URL:  "https://docs.example.com",
+	}
+
+	data, err = json.Marshal(linkWithoutIcon)
+	if err != nil {
+		t.Fatalf("Failed to marshal link without icon: %v", err)
+	}
+
+	// Verify icon field is omitted
+	jsonStr := string(data)
+	if jsonStr != `{"name":"Docs","url":"https://docs.example.com"}` {
+		t.Errorf("Expected icon field to be omitted, got: %s", jsonStr)
+	}
+}
