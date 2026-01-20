@@ -3,6 +3,37 @@
 /* ===== DETROIT: BECOME HUMAN THEME ===== */
 /* Primary: Cyan #00d4ff | Secondary: Orange #f28d1d -> Magenta #a40054 */
 
+/* ===== FONT DEFINITIONS ===== */
+/* Note: Add Gotham font files to /src/lib/assets/fonts/ for local hosting */
+/* For now using system fonts as fallback */
+
+/* Gotham Ultra - for headings and large display text */
+@font-face {
+	font-family: 'Gotham';
+	font-weight: 800; /* Ultra */
+	font-style: normal;
+	font-display: swap;
+	src: local('Gotham Ultra'), local('Gotham-Ultra');
+}
+
+/* Gotham Book/Light - for body text */
+@font-face {
+	font-family: 'Gotham';
+	font-weight: 300; /* Book/Light */
+	font-style: normal;
+	font-display: swap;
+	src: local('Gotham Book'), local('Gotham-Book'), local('Gotham Light'), local('Gotham-Light');
+}
+
+/* Gotham Medium - for slightly emphasized text */
+@font-face {
+	font-family: 'Gotham';
+	font-weight: 500; /* Medium */
+	font-style: normal;
+	font-display: swap;
+	src: local('Gotham Medium'), local('Gotham-Medium');
+}
+
 @theme {
 	/* Primary Colors - Cyan */
 	--color-detroit-primary: #00d4ff;
@@ -52,12 +83,18 @@ html, body {
 }
 
 body {
-	font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+	font-family: 'Gotham', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
 	background: linear-gradient(135deg, var(--color-detroit-bg) 0%, var(--color-detroit-bg-light) 50%, #08080d 100%);
 	background-attachment: fixed;
 	color: var(--color-detroit-text);
-	font-weight: 300;
+	font-weight: 300; /* Gotham Book/Light for body text */
 	letter-spacing: 0.02em;
+}
+
+/* Large display text - use Gotham Ultra */
+h1, h2, .detroit-title {
+	font-family: 'Gotham', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+	font-weight: 800; /* Gotham Ultra */
 }
 
 /* ===== DETROIT CLIP PATHS ===== */
@@ -118,6 +155,11 @@ body {
 /* Hexagon */
 .detroit-clip-hex {
 	clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+/* Squared hexagon with steeper slopes - for YTD stats */
+.detroit-clip-hex-square {
+	clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
 }
 
 /* Arrow/chevron shape */
@@ -268,14 +310,14 @@ body {
 .detroit-corners-lg > .corner-tr {
 	top: 0;
 	right: 0;
-	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-secondary) 100%);
+	background: linear-gradient(90deg, var(--color-detroit-secondary-dark) 0%, var(--color-detroit-secondary) 100%);
 	transform-origin: top right;
 	transform: rotate(45deg) translateY(-50%);
 }
 .detroit-corners-lg > .corner-bl {
 	bottom: 0;
 	left: 0;
-	background: linear-gradient(90deg, var(--color-detroit-accent) 0%, var(--color-detroit-secondary) 100%);
+	background: linear-gradient(90deg, var(--color-detroit-primary-dark) 0%, var(--color-detroit-primary) 100%);
 	transform-origin: bottom left;
 	transform: rotate(45deg) translateY(50%);
 }
@@ -295,14 +337,14 @@ body {
 .detroit-corners-md > .corner-tr {
 	top: 0;
 	right: 0;
-	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-secondary) 100%);
+	background: linear-gradient(90deg, var(--color-detroit-secondary-dark) 0%, var(--color-detroit-secondary) 100%);
 	transform-origin: top right;
 	transform: rotate(45deg) translateY(-50%);
 }
 .detroit-corners-md > .corner-bl {
 	bottom: 0;
 	left: 0;
-	background: linear-gradient(90deg, var(--color-detroit-accent) 0%, var(--color-detroit-secondary) 100%);
+	background: linear-gradient(90deg, var(--color-detroit-primary-dark) 0%, var(--color-detroit-primary) 100%);
 	transform-origin: bottom left;
 	transform: rotate(45deg) translateY(50%);
 }
@@ -419,7 +461,7 @@ body {
 	top: 0;
 	bottom: 0;
 	width: var(--detroit-border-thick);
-	background: linear-gradient(180deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 60%, var(--color-detroit-secondary) 100%);
+	background: linear-gradient(180deg, var(--color-detroit-secondary) 0%, var(--color-detroit-primary) 40%, var(--color-detroit-primary) 100%);
 	transform: skewX(-15deg);
 }
 
@@ -430,7 +472,7 @@ body {
 	left: 1.5rem;
 	width: 100px;
 	height: 3px;
-	background: linear-gradient(90deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 50%, var(--color-detroit-secondary) 80%, transparent 100%);
+	background: linear-gradient(270deg, var(--color-detroit-primary) 0%, var(--color-detroit-primary) 50%, var(--color-detroit-secondary) 80%, transparent 100%);
 	transform: skewX(-45deg);
 }
 

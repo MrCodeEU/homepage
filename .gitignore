@@ -24,3 +24,6 @@ backend/data/
 # SvelteKit
 .svelte-kit/
 backend/cmd/server/static/.claude/
+
+
+*.exe

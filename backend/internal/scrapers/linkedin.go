@@ -2,9 +2,12 @@ package scrapers
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -18,6 +21,7 @@ import (
 
 const (
 	cacheKeyLinkedIn        = "linkedin_data"
+	cacheKeyLinkedInCookies = "linkedin_cookies"
 	cacheKeyLinkedInCookies = "linkedin_cookies"
 	linkedInLoginURL        = "https://www.linkedin.com/login"
 	linkedInTimeoutSec      = 120
@@ -34,6 +38,18 @@ type LinkedInScraper struct {
 	headless   bool
 }
 
+// LinkedInCookie represents a browser cookie for persistence
+type LinkedInCookie struct {
+	Name     string  `json:"name"`
+	Value    string  `json:"value"`
+	Domain   string  `json:"domain"`
+	Path     string  `json:"path"`
+	Expires  float64 `json:"expires"`
+	HTTPOnly bool    `json:"httpOnly"`
+	Secure   bool    `json:"secure"`
+	SameSite string  `json:"sameSite"`
+}
+
 // NewLinkedInScraper creates a new LinkedIn scraper with chromedp
 func NewLinkedInScraper(email, password, totpSecret, profileURL string, cache storage.Cache) *LinkedInScraper {
 	return &LinkedInScraper{
@@ -45,6 +61,56 @@ func NewLinkedInScraper(email, password, totpSecret, profileURL string, cache st
 		cacheTTL:   24 * time.Hour,
 		headless:   true, // Always headless for CI/CD compatibility
 	}
+}
+
+// downloadImageAsBase64 downloads an image and converts it to a base64 data URI
+// This bypasses tracking protection that blocks LinkedIn CDN requests
+func downloadImageAsBase64(imageURL string) string {
+	if imageURL == "" {
+		return ""
+	}
+
+	// Skip if already a data URI
+	if strings.HasPrefix(imageURL, "data:") {
+		return imageURL
+	}
+
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	resp, err := client.Get(imageURL)
+	if err != nil {
+		log.Printf("Failed to download image %s: %v", imageURL, err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Failed to download image %s: status %d", imageURL, resp.StatusCode)
+		return ""
+	}
+
+	// Read image data
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Failed to read image data: %v", err)
+		return ""
+	}
+
+	// Detect content type
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = http.DetectContentType(data)
+	}
+
+	// Convert to base64 data URI
+	base64Data := base64.StdEncoding.EncodeToString(data)
+	dataURI := fmt.Sprintf("data:%s;base64,%s", contentType, base64Data)
+
+	log.Printf("Converted image to base64 data URI (%d bytes)", len(data))
+	return dataURI
 }
 
 // Name returns the scraper name
@@ -98,6 +164,23 @@ func (l *LinkedInScraper) Scrape() (any, error) {
 	ctx, cancel = context.WithTimeout(ctx, linkedInTimeoutSec*time.Second)
 	defer cancel()
 
+	// Try to restore cookies from cache for faster login
+	cookiesRestored := l.restoreCookies(ctx)
+	if cookiesRestored {
+		log.Println("Restored cookies from cache, checking if session is valid...")
+		// Navigate to LinkedIn to check if session is valid
+		if err := chromedp.Run(ctx, chromedp.Navigate("https://www.linkedin.com/feed/")); err == nil {
+			// Check if we're logged in
+			var currentURL string
+			_ = chromedp.Run(ctx, chromedp.Location(&currentURL))
+			if !strings.Contains(currentURL, "login") && !strings.Contains(currentURL, "checkpoint") {
+				log.Println("Cookie session is valid, skipping login...")
+				goto extractData
+			}
+		}
+		log.Println("Cookie session expired or invalid, performing fresh login...")
+	}
+
 	// Try to restore cookies and check if already logged in
 	cookiesRestored, err := l.restoreCookies(ctx)
 	if err != nil {
@@ -139,6 +222,115 @@ func (l *LinkedInScraper) Scrape() (any, error) {
 
 	log.Println("Profile data extracted successfully")
 	return data, nil
+}
+
+// saveCookies saves LinkedIn cookies to cache for session persistence
+func (l *LinkedInScraper) saveCookies(ctx context.Context) {
+	var allCookies []LinkedInCookie
+
+	// Use CDP Network.getCookies to get all cookies including HttpOnly
+	err := chromedp.Run(ctx,
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			cookies, err := network.GetCookies().Do(ctx)
+			if err != nil {
+				return err
+			}
+
+			for _, c := range cookies {
+				// Only save LinkedIn-related cookies
+				if strings.Contains(c.Domain, "linkedin.com") {
+					allCookies = append(allCookies, LinkedInCookie{
+						Name:     c.Name,
+						Value:    c.Value,
+						Domain:   c.Domain,
+						Path:     c.Path,
+						Expires:  c.Expires,
+						HTTPOnly: c.HTTPOnly,
+						Secure:   c.Secure,
+						SameSite: string(c.SameSite),
+					})
+				}
+			}
+			return nil
+		}),
+	)
+
+	if err != nil {
+		log.Printf("Warning: failed to extract cookies: %v", err)
+		return
+	}
+
+	// Marshal and save to cache (7 days TTL for cookies)
+	if len(allCookies) > 0 {
+		cookieData, err := json.Marshal(allCookies)
+		if err != nil {
+			log.Printf("Warning: failed to marshal cookies: %v", err)
+			return
+		}
+		if err := l.cache.Set(cacheKeyLinkedInCookies, cookieData, 7*24*time.Hour); err != nil {
+			log.Printf("Warning: failed to save cookies to cache: %v", err)
+		} else {
+			log.Printf("Saved %d LinkedIn cookies to cache", len(allCookies))
+		}
+	}
+}
+
+// restoreCookies restores LinkedIn cookies from cache
+func (l *LinkedInScraper) restoreCookies(ctx context.Context) bool {
+	cached, err := l.cache.Get(cacheKeyLinkedInCookies)
+	if err != nil || cached == nil {
+		return false
+	}
+
+	var cookies []LinkedInCookie
+	if err := json.Unmarshal(cached, &cookies); err != nil {
+		log.Printf("Warning: failed to unmarshal cached cookies: %v", err)
+		return false
+	}
+
+	if len(cookies) == 0 {
+		return false
+	}
+
+	// Convert to CDP cookies and set them
+	err = chromedp.Run(ctx,
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			for _, c := range cookies {
+				// Convert SameSite string to enum
+				var sameSite network.CookieSameSite
+				switch c.SameSite {
+				case "Strict":
+					sameSite = network.CookieSameSiteStrict
+				case "Lax":
+					sameSite = network.CookieSameSiteLax
+				case "None":
+					sameSite = network.CookieSameSiteNone
+				default:
+					sameSite = network.CookieSameSiteLax
+				}
+
+				err := network.SetCookie(c.Name, c.Value).
+					WithDomain(c.Domain).
+					WithPath(c.Path).
+					WithHTTPOnly(c.HTTPOnly).
+					WithSecure(c.Secure).
+					WithSameSite(sameSite).
+					Do(ctx)
+				if err != nil {
+					log.Printf("Warning: failed to set cookie %s: %v", c.Name, err)
+				}
+			}
+			return nil
+		}),
+	)
+
+	if err != nil {
+		log.Printf("Warning: failed to restore cookies: %v", err)
+		return false
+	}
+
+	log.Printf("Restored %d cookies from cache", len(cookies))
+	return true
 }
 
 // Refresh forces a fresh scrape and updates cache
@@ -452,12 +644,12 @@ func (l *LinkedInScraper) extractProfile(ctx context.Context, data *models.Linke
 		data.Profile.Summary = strings.TrimSpace(summary)
 	}
 
-	// Extract profile photo URL
+	// Extract profile photo URL and convert to base64 to bypass tracking protection
 	var photoURL string
 	if err := chromedp.Run(ctx,
 		chromedp.AttributeValue(`img.pv-top-card-profile-picture__image`, "src", &photoURL, nil, chromedp.AtLeast(0)),
 	); err == nil && photoURL != "" {
-		data.Profile.PhotoURL = photoURL
+		data.Profile.PhotoURL = downloadImageAsBase64(photoURL)
 	}
 
 	log.Printf("Extracted profile: %s - %s", data.Profile.Name, data.Profile.Headline)
@@ -649,10 +841,13 @@ func (l *LinkedInScraper) extractExperience(ctx context.Context, data *models.Li
 		}
 		seen[key] = true
 
+		// Convert logo URL to base64 data URI to bypass tracking protection
+		logoDataURI := downloadImageAsBase64(raw.Logo)
+
 		exp := models.LinkedInExperience{
 			Title:       raw.Title,
 			Company:     raw.Company,
-			CompanyLogo: raw.Logo,
+			CompanyLogo: logoDataURI,
 			Location:    raw.Location,
 			Description: raw.Description,
 			Duration:    raw.Duration,
@@ -804,9 +999,12 @@ func (l *LinkedInScraper) extractEducation(ctx context.Context, data *models.Lin
 		}
 		seen[key] = true
 
+		// Convert logo URL to base64 data URI to bypass tracking protection
+		logoDataURI := downloadImageAsBase64(raw.Logo)
+
 		edu := models.LinkedInEducation{
 			School:      raw.School,
-			SchoolLogo:  raw.Logo,
+			SchoolLogo:  logoDataURI,
 			Degree:      raw.Degree,
 			Field:       raw.Field,
 			Description: raw.Description,
