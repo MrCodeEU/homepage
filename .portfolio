@@ -1,0 +1,5 @@
+{
+  "featured": true,
+  "description": "Personal homepage with automated data aggregation",
+  "tags": ["golang", "svelte", "automation"]
+}

@@ -115,34 +115,50 @@ func (s *StravaScraper) GetCached() (any, error) {
 
 // Scrape fetches fresh data from Strava
 func (s *StravaScraper) Scrape() (any, error) {
+	log.Println("Starting Strava data collection...")
+	
 	// Ensure we have a valid access token
+	log.Println("Authenticating with Strava API...")
 	if err := s.ensureAccessToken(); err != nil {
 		return nil, fmt.Errorf("failed to get access token: %w", err)
 	}
+	log.Println("✓ Authentication successful")
 
 	// Fetch athlete stats
+	log.Println("Fetching athlete statistics...")
 	stats, err := s.fetchAthleteStats()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch stats: %w", err)
 	}
+	log.Printf("✓ Stats retrieved: %d total runs, %.2f km total distance", stats.AllRunTotals.Count, stats.AllRunTotals.Distance/1000)
 
 	// Fetch recent running activities (last 30 days, max 200)
+	log.Println("Fetching recent activities (max 200)...")
 	activities, err := s.fetchActivities(200, 1)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch activities: %w", err)
 	}
+	log.Printf("✓ Retrieved %d activities", len(activities))
 
 	// Filter to running activities only
+	log.Println("Filtering running activities...")
 	runActivities := s.filterRunningActivities(activities)
+	log.Printf("✓ Found %d running activities", len(runActivities))
 
 	// Get recent 10 activities
+	log.Println("Selecting 10 most recent activities...")
 	recentActivities := s.getRecentActivities(runActivities, 10)
+	log.Printf("✓ Selected %d recent activities", len(recentActivities))
 
 	// Find best activities
+	log.Println("Finding best performances...")
 	bestActivities := s.findBestActivities(runActivities)
+	log.Println("✓ Best activities identified")
 
 	// Calculate personal records
+	log.Println("Calculating personal records...")
 	personalRecords := s.calculatePersonalRecords(runActivities)
+	log.Printf("✓ Found %d personal records", len(personalRecords))
 
 	// Build result
 	result := models.StravaData{

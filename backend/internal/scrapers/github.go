@@ -118,21 +118,29 @@ func (g *GitHubScraper) GetCached() (any, error) {
 
 // Scrape fetches fresh data from GitHub
 func (g *GitHubScraper) Scrape() (any, error) {
+	log.Printf("Fetching repositories for user: %s", g.username)
+	
 	// Get all repositories
 	repos, err := g.fetchRepositories()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch repositories: %w", err)
 	}
 
+	log.Printf("Found %d total repositories for user %s", len(repos), g.username)
+
 	// Filter and enrich portfolio projects
 	projects := make([]Project, 0)
-	for _, repo := range repos {
+	for i, repo := range repos {
+		log.Printf("[%d/%d] Checking repository: %s (private: %v)", i+1, len(repos), repo.Name, repo.Private)
+		
 		// Skip private repos
 		if repo.Private {
+			log.Printf("  → Skipped (private repository)")
 			continue
 		}
 
 		// Check for portfolio marker
+		log.Printf("  → Checking for portfolio markers...")
 		hasMarker, metadata, err := g.checkPortfolioMarker(repo.Name)
 		if err != nil {
 			// Log error with context but continue to next repo
@@ -256,17 +264,20 @@ func (g *GitHubScraper) checkPortfolioMarker(repoName string) (bool, PortfolioMe
 	// Try to fetch .portfolio file
 	content, err := g.fetchFileContent(repoName, portfolioFile)
 	if err == nil {
+		log.Printf("    Found .portfolio file in %s", repoName)
 		// Parse .portfolio JSON
 		var metadata PortfolioMetadata
 		if unmarshalErr := json.Unmarshal([]byte(content), &metadata); unmarshalErr != nil {
-			log.Printf("Warning: Invalid .portfolio JSON in %s: %v", repoName, unmarshalErr)
+			log.Printf("    Warning: Invalid .portfolio JSON in %s: %v", repoName, unmarshalErr)
 			// Invalid JSON in .portfolio is a real error we should report
 			return false, PortfolioMetadata{}, fmt.Errorf("invalid .portfolio file: %w", unmarshalErr)
 		}
+		log.Printf("    ✓ Valid .portfolio metadata loaded")
 		return true, metadata, nil
 	}
 
 	// If .portfolio doesn't exist, check README for marker
+	log.Printf("    No .portfolio file, checking README...")
 	readme, readmeErr := g.fetchREADME(repoName)
 	if readmeErr != nil {
 		// If both .portfolio and README don't exist or can't be fetched,
@@ -275,10 +286,20 @@ func (g *GitHubScraper) checkPortfolioMarker(repoName string) (bool, PortfolioMe
 	}
 
 	// Check for <!-- PORTFOLIO --> comment or 🎨 emoji
-	if strings.Contains(readme, "<!-- PORTFOLIO -->") || strings.Contains(readme, "🎨") {
+	hasHTMLComment := strings.Contains(readme, "<!-- PORTFOLIO -->")
+	hasEmojiMarker := strings.Contains(readme, "🎨")
+	
+	if hasHTMLComment {
+		log.Printf("    ✓ Found <!-- PORTFOLIO --> marker in README")
 		return true, PortfolioMetadata{}, nil
 	}
-
+	
+	if hasEmojiMarker {
+		log.Printf("    ✓ Found 🎨 emoji marker in README")
+		return true, PortfolioMetadata{}, nil
+	}
+	
+	log.Printf("    No portfolio markers found")
 	return false, PortfolioMetadata{}, nil
 }
 

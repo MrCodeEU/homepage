@@ -115,11 +115,21 @@ func main() {
 }
 
 func generateGitHub(cfg *config.Config, cache storage.Cache, outputDir string) error {
+	log.Println("Generating GitHub data...")
+	
 	if cfg.GitHubUsername == "" {
+		log.Println("ERROR: GITHUB_USERNAME environment variable is not set!")
+		log.Println("Please set GITHUB_USERNAME to your GitHub username")
 		return fmt.Errorf("GITHUB_USERNAME not set")
 	}
-
-	log.Println("Generating GitHub data...")
+	
+	if cfg.GitHubToken == "" {
+		log.Println("WARNING: GITHUB_TOKEN is not set - API rate limits will be very restrictive")
+		log.Println("It's highly recommended to set a GitHub personal access token")
+	}
+	
+	log.Printf("GitHub username: %s", cfg.GitHubUsername)
+	log.Printf("GitHub token present: %v", cfg.GitHubToken != "")
 
 	scraper := scrapers.NewGitHubScraper(cfg.GitHubUsername, cfg.GitHubToken, cache)
 	data, err := scraper.Scrape()
@@ -138,12 +148,18 @@ func generateGitHub(cfg *config.Config, cache storage.Cache, outputDir string) e
 }
 
 func generateStrava(cfg *config.Config, cache storage.Cache, outputDir string) error {
+	log.Println("Generating Strava data...")
+	
 	if cfg.StravaClientID == "" || cfg.StravaClientSecret == "" || cfg.StravaRefreshToken == "" {
-		log.Println("Skipping Strava generation: credentials not set (need STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)")
+		log.Println("WARNING: Strava credentials incomplete:")
+		log.Printf("  STRAVA_CLIENT_ID present: %v", cfg.StravaClientID != "")
+		log.Printf("  STRAVA_CLIENT_SECRET present: %v", cfg.StravaClientSecret != "")
+		log.Printf("  STRAVA_REFRESH_TOKEN present: %v", cfg.StravaRefreshToken != "")
+		log.Println("Skipping Strava data generation")
 		return nil
 	}
-
-	log.Println("Generating Strava data...")
+	
+	log.Println("Strava credentials verified")
 
 	scraper := scrapers.NewStravaScraper(
 		cfg.StravaClientID,
