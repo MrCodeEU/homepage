@@ -112,7 +112,7 @@ func setupTestData(t *testing.T) (cleanup func()) {
 					MaxSpeed:           3.5,
 				},
 			},
-			BestActivities: models.StravaBestRecords{},
+			BestActivities:  models.StravaBestRecords{},
 			PersonalRecords: []models.StravaRecord{},
 		},
 	}
