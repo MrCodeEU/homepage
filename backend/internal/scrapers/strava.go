@@ -116,7 +116,7 @@ func (s *StravaScraper) GetCached() (any, error) {
 // Scrape fetches fresh data from Strava
 func (s *StravaScraper) Scrape() (any, error) {
 	log.Println("Starting Strava data collection...")
-	
+
 	// Ensure we have a valid access token
 	log.Println("Authenticating with Strava API...")
 	if err := s.ensureAccessToken(); err != nil {

@@ -119,7 +119,7 @@ func (g *GitHubScraper) GetCached() (any, error) {
 // Scrape fetches fresh data from GitHub
 func (g *GitHubScraper) Scrape() (any, error) {
 	log.Printf("Fetching repositories for user: %s", g.username)
-	
+
 	// Get all repositories
 	repos, err := g.fetchRepositories()
 	if err != nil {
@@ -132,7 +132,7 @@ func (g *GitHubScraper) Scrape() (any, error) {
 	projects := make([]Project, 0)
 	for i, repo := range repos {
 		log.Printf("[%d/%d] Checking repository: %s (private: %v)", i+1, len(repos), repo.Name, repo.Private)
-		
+
 		// Skip private repos
 		if repo.Private {
 			log.Printf("  → Skipped (private repository)")
@@ -288,17 +288,17 @@ func (g *GitHubScraper) checkPortfolioMarker(repoName string) (bool, PortfolioMe
 	// Check for <!-- PORTFOLIO --> comment or 🎨 emoji
 	hasHTMLComment := strings.Contains(readme, "<!-- PORTFOLIO -->")
 	hasEmojiMarker := strings.Contains(readme, "🎨")
-	
+
 	if hasHTMLComment {
 		log.Printf("    ✓ Found <!-- PORTFOLIO --> marker in README")
 		return true, PortfolioMetadata{}, nil
 	}
-	
+
 	if hasEmojiMarker {
 		log.Printf("    ✓ Found 🎨 emoji marker in README")
 		return true, PortfolioMetadata{}, nil
 	}
-	
+
 	log.Printf("    No portfolio markers found")
 	return false, PortfolioMetadata{}, nil
 }
