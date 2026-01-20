@@ -1,23 +1,38 @@
 {
-  "generated_at": "2026-01-18T12:52:03.333487737Z",
+  "generated_at": "2026-01-20T13:57:59.461776991Z",
   "source": "strava",
   "version": "1.0.0",
   "data": {
     "total_stats": {
-      "count": 174,
-      "distance": 1446589.9999999993,
-      "moving_time": 584117,
-      "elapsed_time": 599856,
-      "elevation_gain": 7582.700000000001
+      "count": 175,
+      "distance": 1452629.4999999993,
+      "moving_time": 586382,
+      "elapsed_time": 602141,
+      "elevation_gain": 7627.500000000001
     },
     "year_to_date_stats": {
-      "count": 0,
-      "distance": 0,
-      "moving_time": 0,
-      "elapsed_time": 0,
-      "elevation_gain": 0
+      "count": 1,
+      "distance": 6040,
+      "moving_time": 2265,
+      "elapsed_time": 2285,
+      "elevation_gain": 44.8
     },
     "recent_activities": [
+      {
+        "id": 17094164008,
+        "name": "Afternoon Run",
+        "distance": 6039.5,
+        "moving_time": 2265,
+        "elapsed_time": 2285,
+        "total_elevation_gain": 44.8,
+        "type": "Run",
+        "start_date": "2026-01-18T14:22:45Z",
+        "average_pace": 6.25156289072268,
+        "average_speed": 2.666,
+        "max_speed": 8.4,
+        "average_heartrate": 165.2,
+        "max_heartrate": 179
+      },
       {
         "id": 16834991834,
         "name": "Morning Run",
@@ -152,19 +167,6 @@
         "max_speed": 3.972,
         "average_heartrate": 162.4,
         "max_heartrate": 176
-      },
-      {
-        "id": 15883651317,
-        "name": "Erster Lauf nach Marathon (Tracking verkackt)",
-        "distance": 3000,
-        "moving_time": 1240,
-        "elapsed_time": 1240,
-        "total_elevation_gain": 0,
-        "type": "Run",
-        "start_date": "2025-09-21T06:32:44Z",
-        "average_pace": 6.889899407468651,
-        "average_speed": 2.419,
-        "max_speed": 0
       }
     ],
     "best_activities": {
