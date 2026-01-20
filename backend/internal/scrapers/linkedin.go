@@ -545,11 +545,11 @@ func (l *LinkedInScraper) handle2FA(ctx context.Context) error {
 	return nil
 }
 
-// extractProfileData navigates to the profile and extracts all data
+// extractProfileData navigates to the profile and detail pages to extract all data
 func (l *LinkedInScraper) extractProfileData(ctx context.Context) (*models.LinkedInData, error) {
 	log.Printf("Navigating to profile: %s", l.profileURL)
 
-	// Navigate to profile page
+	// Navigate to main profile page first for basic info
 	if err := chromedp.Run(ctx,
 		chromedp.Navigate(l.profileURL),
 		chromedp.WaitVisible(`main`, chromedp.ByQuery),
@@ -560,20 +560,6 @@ func (l *LinkedInScraper) extractProfileData(ctx context.Context) (*models.Linke
 	// Wait for profile content to load
 	time.Sleep(3 * time.Second)
 
-	// Scroll down to load lazy-loaded sections
-	for i := 0; i < 5; i++ {
-		_ = chromedp.Run(ctx,
-			chromedp.Evaluate(`window.scrollBy(0, 800)`, nil),
-		)
-		time.Sleep(500 * time.Millisecond)
-	}
-
-	// Scroll back to top
-	_ = chromedp.Run(ctx,
-		chromedp.Evaluate(`window.scrollTo(0, 0)`, nil),
-	)
-	time.Sleep(1 * time.Second)
-
 	data := &models.LinkedInData{
 		Profile:    models.LinkedInProfile{},
 		Experience: []models.LinkedInExperience{},
@@ -581,24 +567,42 @@ func (l *LinkedInScraper) extractProfileData(ctx context.Context) (*models.Linke
 		Skills:     []string{},
 	}
 
-	// Extract profile information
+	// Extract profile information from main page
 	if err := l.extractProfile(ctx, data); err != nil {
 		log.Printf("Warning: failed to extract profile info: %v", err)
 	}
 
-	// Extract experience
-	if err := l.extractExperience(ctx, data); err != nil {
-		log.Printf("Warning: failed to extract experience: %v", err)
+	// Navigate to experience details page for full experience data
+	experienceURL := l.profileURL + "/details/experience/"
+	log.Printf("Navigating to experience details: %s", experienceURL)
+	if err := l.extractExperienceFromDetailsPage(ctx, experienceURL, data); err != nil {
+		log.Printf("Warning: failed to extract experience from details page: %v", err)
+		// Fallback to main profile page extraction
+		if err := l.extractExperience(ctx, data); err != nil {
+			log.Printf("Warning: failed to extract experience from main page: %v", err)
+		}
 	}
 
-	// Extract education
-	if err := l.extractEducation(ctx, data); err != nil {
-		log.Printf("Warning: failed to extract education: %v", err)
+	// Navigate to education details page for full education data
+	educationURL := l.profileURL + "/details/education/"
+	log.Printf("Navigating to education details: %s", educationURL)
+	if err := l.extractEducationFromDetailsPage(ctx, educationURL, data); err != nil {
+		log.Printf("Warning: failed to extract education from details page: %v", err)
+		// Fallback to main profile page extraction
+		if err := l.extractEducation(ctx, data); err != nil {
+			log.Printf("Warning: failed to extract education from main page: %v", err)
+		}
 	}
 
-	// Extract skills
-	if err := l.extractSkills(ctx, data); err != nil {
-		log.Printf("Warning: failed to extract skills: %v", err)
+	// Navigate to skills details page for full skills data
+	skillsURL := l.profileURL + "/details/skills/"
+	log.Printf("Navigating to skills details: %s", skillsURL)
+	if err := l.extractSkillsFromDetailsPage(ctx, skillsURL, data); err != nil {
+		log.Printf("Warning: failed to extract skills from details page: %v", err)
+		// Fallback to main profile page extraction
+		if err := l.extractSkills(ctx, data); err != nil {
+			log.Printf("Warning: failed to extract skills from main page: %v", err)
+		}
 	}
 
 	return data, nil
@@ -1107,6 +1111,443 @@ func (l *LinkedInScraper) extractSkills(ctx context.Context, data *models.Linked
 
 	if len(data.Skills) == 0 {
 		log.Println("No skills extracted")
+	}
+
+	return nil
+}
+
+// extractExperienceFromDetailsPage navigates to the experience details page and extracts all entries
+func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, url string, data *models.LinkedInData) error {
+	// Navigate to experience details page
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(url),
+		chromedp.WaitVisible(`main`, chromedp.ByQuery),
+	); err != nil {
+		return fmt.Errorf("failed to load experience details page: %w", err)
+	}
+
+	// Wait for content to load
+	time.Sleep(3 * time.Second)
+
+	// Scroll down to load all items (details pages often have more entries)
+	for i := 0; i < 8; i++ {
+		_ = chromedp.Run(ctx,
+			chromedp.Evaluate(`window.scrollBy(0, 600)`, nil),
+		)
+		time.Sleep(400 * time.Millisecond)
+	}
+
+	// Scroll back to top
+	_ = chromedp.Run(ctx,
+		chromedp.Evaluate(`window.scrollTo(0, 0)`, nil),
+	)
+	time.Sleep(1 * time.Second)
+
+	// Use JavaScript to extract experience data from details page
+	var experienceJSON string
+	err := chromedp.Run(ctx,
+		chromedp.Evaluate(`
+			(function() {
+				const experiences = [];
+
+				// Find all experience items - details page has different structure
+				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li');
+
+				items.forEach((item) => {
+					const exp = {};
+
+					// Get logo/company image
+					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3, img[data-delayed-url]');
+					if (logoImg) {
+						const src = logoImg.src || logoImg.getAttribute('data-delayed-url');
+						if (src && !src.includes('ghost') && !src.includes('data:image')) {
+							exp.logo = src;
+						}
+					}
+
+					// Get all visible text spans
+					const spans = item.querySelectorAll('span[aria-hidden="true"]');
+					const texts = Array.from(spans).map(s => s.textContent.trim()).filter(t => t && t.length > 0);
+
+					// Title is typically the first bold text
+					const titleEl = item.querySelector('.t-bold span[aria-hidden="true"], .mr1.t-bold span[aria-hidden="true"]');
+					if (titleEl) {
+						exp.title = titleEl.textContent.trim();
+					}
+
+					// Company - look for company link or normal text
+					const companyLink = item.querySelector('a[href*="/company/"]');
+					if (companyLink) {
+						const companySpan = companyLink.querySelector('span[aria-hidden="true"]');
+						if (companySpan) {
+							exp.company = companySpan.textContent.trim().split(' · ')[0].trim();
+						}
+					}
+
+					// If no company from link, look in normal text spans
+					if (!exp.company) {
+						const normalSpans = item.querySelectorAll('.t-14.t-normal:not(.t-black--light) span[aria-hidden="true"]');
+						for (const span of normalSpans) {
+							const text = span.textContent.trim();
+							if (/\d{4}|heute|present|monat|year|·.*zeit/i.test(text)) continue;
+							if (text === exp.title) continue;
+							const parts = text.split(' · ');
+							exp.company = parts[0].trim();
+							break;
+						}
+					}
+
+					// Date range - look for text with date patterns
+					const lightSpans = item.querySelectorAll('.t-14.t-normal.t-black--light span[aria-hidden="true"], .t-14.t-black--light span[aria-hidden="true"]');
+					for (const span of lightSpans) {
+						const text = span.textContent.trim();
+						if (/\d{4}|heute|present|jan|feb|mär|apr|mai|jun|jul|aug|sep|okt|nov|dez/i.test(text)) {
+							const parts = text.split(' · ');
+							exp.dateRange = parts[0].trim();
+							if (parts.length > 1) {
+								exp.duration = parts[1].trim();
+							}
+							break;
+						}
+					}
+
+					// Location - second light span that doesn't contain dates
+					let foundDate = false;
+					for (const span of lightSpans) {
+						const text = span.textContent.trim();
+						if (/\d{4}|heute|present/i.test(text)) {
+							foundDate = true;
+							continue;
+						}
+						if (foundDate && text && !exp.location) {
+							exp.location = text;
+							break;
+						}
+					}
+
+					// Description - look for longer text or show-more content
+					const descEl = item.querySelector('.inline-show-more-text span[aria-hidden="true"], .pvs-list__outer-container .t-14.t-normal span[aria-hidden="true"]');
+					if (descEl) {
+						const descText = descEl.textContent.trim();
+						// Only use as description if it's longer and not a date/company
+						if (descText.length > 50 && !/^\d{4}|^[A-Z][a-z]{2}\.?\s+\d{4}/.test(descText)) {
+							exp.description = descText;
+						}
+					}
+
+					// Only add if we have meaningful data
+					if (exp.title && exp.title.length > 1 && exp.title !== exp.company) {
+						experiences.push(exp);
+					}
+				});
+
+				return JSON.stringify(experiences);
+			})()
+		`, &experienceJSON),
+	)
+
+	if err != nil {
+		return fmt.Errorf("error extracting experience via JS: %w", err)
+	}
+
+	var rawExperiences []struct {
+		Title       string `json:"title"`
+		Company     string `json:"company"`
+		Logo        string `json:"logo"`
+		DateRange   string `json:"dateRange"`
+		Duration    string `json:"duration"`
+		Location    string `json:"location"`
+		Description string `json:"description"`
+	}
+
+	if err := json.Unmarshal([]byte(experienceJSON), &rawExperiences); err != nil {
+		return fmt.Errorf("error parsing experience JSON: %w", err)
+	}
+
+	log.Printf("Found %d experience items from details page", len(rawExperiences))
+
+	// Track seen entries to avoid duplicates
+	seen := make(map[string]bool)
+
+	for _, raw := range rawExperiences {
+		if raw.Title == raw.Company && raw.Company != "" {
+			continue
+		}
+
+		key := fmt.Sprintf("%s|%s|%s", raw.Title, raw.Company, raw.DateRange)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+
+		logoDataURI := downloadImageAsBase64(raw.Logo)
+
+		exp := models.LinkedInExperience{
+			Title:       raw.Title,
+			Company:     raw.Company,
+			CompanyLogo: logoDataURI,
+			Location:    raw.Location,
+			Description: raw.Description,
+			Duration:    raw.Duration,
+		}
+		exp.StartDate, exp.EndDate = parseLinkedInDateRange(raw.DateRange)
+
+		if exp.Title != "" {
+			data.Experience = append(data.Experience, exp)
+			log.Printf("Extracted experience: %s at %s (%s - %s)", exp.Title, exp.Company, exp.StartDate, exp.EndDate)
+		}
+	}
+
+	if len(data.Experience) == 0 {
+		return fmt.Errorf("no experience items extracted from details page")
+	}
+
+	return nil
+}
+
+// extractEducationFromDetailsPage navigates to the education details page and extracts all entries
+func (l *LinkedInScraper) extractEducationFromDetailsPage(ctx context.Context, url string, data *models.LinkedInData) error {
+	// Navigate to education details page
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(url),
+		chromedp.WaitVisible(`main`, chromedp.ByQuery),
+	); err != nil {
+		return fmt.Errorf("failed to load education details page: %w", err)
+	}
+
+	// Wait for content to load
+	time.Sleep(3 * time.Second)
+
+	// Scroll down to load all items
+	for i := 0; i < 6; i++ {
+		_ = chromedp.Run(ctx,
+			chromedp.Evaluate(`window.scrollBy(0, 600)`, nil),
+		)
+		time.Sleep(400 * time.Millisecond)
+	}
+
+	// Scroll back to top
+	_ = chromedp.Run(ctx,
+		chromedp.Evaluate(`window.scrollTo(0, 0)`, nil),
+	)
+	time.Sleep(1 * time.Second)
+
+	// Use JavaScript to extract education data from details page
+	var educationJSON string
+	err := chromedp.Run(ctx,
+		chromedp.Evaluate(`
+			(function() {
+				const education = [];
+
+				// Find all education items
+				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li');
+
+				items.forEach((item) => {
+					const edu = {};
+
+					// Get logo/school image
+					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3, img[data-delayed-url]');
+					if (logoImg) {
+						const src = logoImg.src || logoImg.getAttribute('data-delayed-url');
+						if (src && !src.includes('ghost') && !src.includes('data:image')) {
+							edu.logo = src;
+						}
+					}
+
+					// School name - first bold text
+					const schoolEl = item.querySelector('.t-bold span[aria-hidden="true"], .mr1.t-bold span[aria-hidden="true"]');
+					if (schoolEl) {
+						edu.school = schoolEl.textContent.trim();
+					}
+
+					// Degree and field - usually in normal text
+					const normalSpans = item.querySelectorAll('.t-14.t-normal:not(.t-black--light) span[aria-hidden="true"]');
+					for (const span of normalSpans) {
+						const text = span.textContent.trim();
+						if (/\d{4}|heute|present/i.test(text)) continue;
+						if (text === edu.school) continue;
+						const parts = text.split(', ');
+						edu.degree = parts[0] || '';
+						edu.field = parts.slice(1).join(', ') || '';
+						break;
+					}
+
+					// Date range - look in light-colored spans
+					const lightSpans = item.querySelectorAll('.t-14.t-normal.t-black--light span[aria-hidden="true"], .t-14.t-black--light span[aria-hidden="true"]');
+					for (const span of lightSpans) {
+						const text = span.textContent.trim();
+						if (/\d{4}/.test(text) && text.length < 40) {
+							edu.dateRange = text;
+							break;
+						}
+					}
+
+					// Description/activities
+					const descEl = item.querySelector('.inline-show-more-text span[aria-hidden="true"]');
+					if (descEl) {
+						edu.description = descEl.textContent.trim();
+					}
+
+					// Validate entry
+					if (edu.school &&
+						edu.school.length > 3 &&
+						!/^note:/i.test(edu.school) &&
+						!/^\d+[\.,]\d+$/.test(edu.school)) {
+						education.push(edu);
+					}
+				});
+
+				return JSON.stringify(education);
+			})()
+		`, &educationJSON),
+	)
+
+	if err != nil {
+		return fmt.Errorf("error extracting education via JS: %w", err)
+	}
+
+	var rawEducation []struct {
+		School      string `json:"school"`
+		Logo        string `json:"logo"`
+		Degree      string `json:"degree"`
+		Field       string `json:"field"`
+		DateRange   string `json:"dateRange"`
+		Description string `json:"description"`
+	}
+
+	if err := json.Unmarshal([]byte(educationJSON), &rawEducation); err != nil {
+		return fmt.Errorf("error parsing education JSON: %w", err)
+	}
+
+	log.Printf("Found %d education items from details page", len(rawEducation))
+
+	seen := make(map[string]bool)
+
+	for _, raw := range rawEducation {
+		key := fmt.Sprintf("%s|%s|%s", raw.School, raw.Degree, raw.DateRange)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+
+		logoDataURI := downloadImageAsBase64(raw.Logo)
+
+		edu := models.LinkedInEducation{
+			School:      raw.School,
+			SchoolLogo:  logoDataURI,
+			Degree:      raw.Degree,
+			Field:       raw.Field,
+			Description: raw.Description,
+		}
+		edu.StartDate, edu.EndDate = parseLinkedInDateRange(raw.DateRange)
+
+		if edu.School != "" {
+			data.Education = append(data.Education, edu)
+			log.Printf("Extracted education: %s - %s (%s - %s)", edu.School, edu.Degree, edu.StartDate, edu.EndDate)
+		}
+	}
+
+	if len(data.Education) == 0 {
+		return fmt.Errorf("no education items extracted from details page")
+	}
+
+	return nil
+}
+
+// extractSkillsFromDetailsPage navigates to the skills details page and extracts all skills
+func (l *LinkedInScraper) extractSkillsFromDetailsPage(ctx context.Context, url string, data *models.LinkedInData) error {
+	// Navigate to skills details page
+	if err := chromedp.Run(ctx,
+		chromedp.Navigate(url),
+		chromedp.WaitVisible(`main`, chromedp.ByQuery),
+	); err != nil {
+		return fmt.Errorf("failed to load skills details page: %w", err)
+	}
+
+	// Wait for content to load
+	time.Sleep(3 * time.Second)
+
+	// Scroll down to load all skills (skills page often has many items)
+	for i := 0; i < 10; i++ {
+		_ = chromedp.Run(ctx,
+			chromedp.Evaluate(`window.scrollBy(0, 500)`, nil),
+		)
+		time.Sleep(300 * time.Millisecond)
+	}
+
+	// Scroll back to top
+	_ = chromedp.Run(ctx,
+		chromedp.Evaluate(`window.scrollTo(0, 0)`, nil),
+	)
+	time.Sleep(1 * time.Second)
+
+	// Use JavaScript to extract skills from details page
+	var skillsJSON string
+	err := chromedp.Run(ctx,
+		chromedp.Evaluate(`
+			(function() {
+				const skills = [];
+				const seen = new Set();
+
+				// Find all skill items - details page shows skills with endorsements
+				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li');
+
+				items.forEach((item) => {
+					// Skill name is usually in a bold span
+					const skillEl = item.querySelector('.t-bold span[aria-hidden="true"], .mr1.t-bold span[aria-hidden="true"]');
+					if (skillEl) {
+						const skill = skillEl.textContent.trim();
+						// Filter out non-skill items
+						if (skill &&
+							skill.length > 1 &&
+							skill.length < 60 &&
+							!skill.includes('Show all') &&
+							!skill.includes('endorsement') &&
+							!skill.includes('Skills') &&
+							!/^\d+$/.test(skill) &&
+							!seen.has(skill.toLowerCase())) {
+							seen.add(skill.toLowerCase());
+							skills.push(skill);
+						}
+					}
+				});
+
+				// Also try alternative selectors for skills page
+				if (skills.length === 0) {
+					const altItems = document.querySelectorAll('[data-field="skill_card_skill_name"] span[aria-hidden="true"]');
+					altItems.forEach((item) => {
+						const skill = item.textContent.trim();
+						if (skill && skill.length > 1 && skill.length < 60 && !seen.has(skill.toLowerCase())) {
+							seen.add(skill.toLowerCase());
+							skills.push(skill);
+						}
+					});
+				}
+
+				return JSON.stringify(skills);
+			})()
+		`, &skillsJSON),
+	)
+
+	if err != nil {
+		return fmt.Errorf("error extracting skills via JS: %w", err)
+	}
+
+	var rawSkills []string
+	if err := json.Unmarshal([]byte(skillsJSON), &rawSkills); err != nil {
+		return fmt.Errorf("error parsing skills JSON: %w", err)
+	}
+
+	log.Printf("Found %d skills from details page", len(rawSkills))
+
+	for _, skill := range rawSkills {
+		if skill != "" && !contains(data.Skills, skill) {
+			data.Skills = append(data.Skills, skill)
+		}
+	}
+
+	if len(data.Skills) == 0 {
+		return fmt.Errorf("no skills extracted from details page")
 	}
 
 	return nil

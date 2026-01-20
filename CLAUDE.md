@@ -99,9 +99,9 @@ cd backend && go build -o homepage ./cmd/server
 
 **API Endpoints:**
 - `GET /api/health` - Health check
-- `GET /api/cv` - CV data (currently mock)
-- `GET /api/projects` - GitHub projects with portfolio markers (cached 1hr)
-- `GET /api/strava` - Strava stats (currently mock)
+- `GET /api/cv` - LinkedIn profile data
+- `GET /api/projects` - GitHub projects with portfolio markers
+- `GET /api/strava` - Strava activity stats
 
 **Internal Packages:**
 - `internal/config/` - Environment-based config (Port, GitHub token/username, cache settings)
@@ -111,9 +111,11 @@ cd backend && go build -o homepage ./cmd/server
   - Converts relative image paths to raw.githubusercontent.com URLs
   - Separates badge images (shields.io, codecov.io, etc.) from regular images using domain detection
   - Supports custom links with optional icons
-- `internal/storage/` - File-based cache with TTL (JSON files in CACHE_DIR)
-  - `DataLoader` - Loads pre-generated JSON data files
-  - Auto-refresh from GitHub raw URLs on startup (disable with `DISABLE_AUTO_REFRESH=true`)
+- `internal/storage/` - Data loading and caching
+  - `DataLoader` - Loads pre-generated JSON data files from `./data/generated/`
+  - Auto-refresh from GitHub raw URLs on startup and every 4 hours (configurable via `DATA_REFRESH_HOURS`)
+  - Disable auto-refresh with `DISABLE_AUTO_REFRESH=true` for local development
+- `internal/models/` - Data structures for GitHub, Strava, and LinkedIn data
 
 **Key Implementation Details:**
 - GitHub API uses Bearer token authentication
@@ -198,8 +200,12 @@ See PORTFOLIO.md for full documentation.
 **Optional:**
 - `PORT` - Server port (default: 8080)
 - `CACHE_DIR` - Cache directory (default: ./data/cache)
-- `DISABLE_AUTO_REFRESH` - Set to `true` to disable auto-refresh from GitHub (useful for local development with generated data)
-- `STRAVA_*` / `LINKEDIN_*` - Future integrations
+- `DATA_REFRESH_HOURS` - Hours between auto-refresh from GitHub (default: 4)
+- `DISABLE_AUTO_REFRESH` - Set to `true` to disable auto-refresh from GitHub (useful for local development)
+
+**For Data Generation (CI/scripts):**
+- `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `STRAVA_REFRESH_TOKEN` - Strava API credentials
+- `LINKEDIN_EMAIL`, `LINKEDIN_PASSWORD`, `LINKEDIN_TOTP_SECRET` - LinkedIn scraper credentials
 
 ## Testing Strategy
 
@@ -218,23 +224,21 @@ See TESTING.md for detailed guidance.
 3. Add TypeScript types and client function in `frontend/src/lib/api.ts`
 4. Write tests: `backend/cmd/server/main_test.go` and `frontend/src/lib/api.test.ts`
 
-### Adding a New Scraper
+### Adding a New Data Source
 
-1. Implement `Scraper` interface in `backend/internal/scrapers/`:
-   - `Name() string`
-   - `Scrape() (any, error)` - Fetch fresh data
-   - `GetCached() (any, error)` - Return cached or fresh
-   - `Refresh() (any, error)` - Force refresh and update cache
-2. Initialize in `main()` with cache instance
-3. Add API endpoint to expose data
-4. Add integration tests
+1. Add scraper in `backend/internal/scrapers/` (see `github.go`, `strava.go` for examples)
+2. Add data model in `backend/internal/models/data.go`
+3. Update `backend/cmd/generate/main.go` to generate data for the new source
+4. Add loader method in `backend/internal/storage/loader.go`
+5. Add API endpoint in `backend/cmd/server/main.go`
+6. Add TypeScript types and client in `frontend/src/lib/api.ts`
 
-### Cache Behavior
+### Data Flow
 
-- Default TTL: 1 hour (configurable in scraper)
-- Cache files: JSON with metadata (`{data, expires_at}`)
-- Auto-cleanup: Expired entries deleted on read
-- Manual clear: Implement refresh endpoint or use cache.Clear()
+1. **Generation**: GitHub Actions runs `make generate-data` periodically with API credentials
+2. **Storage**: Generated JSON files are committed to `backend/data/generated/`
+3. **Refresh**: Server fetches latest data from GitHub raw URLs on startup and every 4 hours
+4. **Serving**: API endpoints read from local JSON files via DataLoader
 
 ## Important Notes
 
@@ -242,4 +246,5 @@ See TESTING.md for detailed guidance.
 - Static files are embedded at Go compile time, not runtime
 - CORS allows `http://localhost:5173` for dev, same-origin only in prod
 - GitHub API rate limit: 60/hr unauthenticated, 5000/hr authenticated
-- Cache directory must be writable (Docker uses volume at `/data`)
+- Data files must exist in `backend/data/generated/` - server auto-refreshes from GitHub repo on startup
+- For local development with generated data, use `DISABLE_AUTO_REFRESH=true`

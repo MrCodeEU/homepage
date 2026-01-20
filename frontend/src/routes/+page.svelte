@@ -151,6 +151,16 @@
 			<div class="detroit-triangle-down absolute bottom-[15%] left-[5%] w-[150px] h-[150px] detroit-animate-float" style="animation-direction: reverse; animation-duration: 8s;"></div>
 
 			<div class="hero-content max-w-[800px] relative z-10 p-12 bg-detroit-bg-card backdrop-blur-[10px] detroit-clip-lg border border-detroit-border-primary">
+				<!-- Profile Photo -->
+				{#if linkedIn?.profile.photo_url}
+					<div class="mb-6 flex justify-center">
+						<img
+							src={linkedIn.profile.photo_url}
+							alt={linkedIn.profile.name || 'Profile'}
+							class="w-24 h-24 rounded-full object-cover border-2 border-detroit-primary/40 shadow-lg shadow-detroit-primary/20"
+						/>
+					</div>
+				{/if}
 				<h1 class="detroit-text-gradient-primary text-[clamp(2.5rem,8vw,4.5rem)] mb-3 leading-[1.1] font-extralight tracking-[0.1em] uppercase">
 					{getDisplayName(linkedIn?.profile.name)}
 				</h1>
@@ -202,8 +212,11 @@
 									{#if exp.company_logo}
 										<img src={exp.company_logo} alt={exp.company} class="company-logo w-[55px] h-[55px] detroit-clip-xs object-cover shrink-0" />
 									{:else}
-										<div class="company-logo-placeholder w-[55px] h-[55px] detroit-clip-xs flex items-center justify-center font-normal text-xl text-detroit-primary shrink-0 border border-detroit-primary/30">
-											{exp.company ? exp.company.charAt(0) : '?'}
+										<div class="company-logo-placeholder w-[55px] h-[55px] detroit-clip-xs flex items-center justify-center shrink-0 border border-detroit-primary/30">
+											<!-- Building/Office icon as fallback -->
+											<svg class="w-7 h-7 text-detroit-primary/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+												<path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0H5m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5m-4 0h4"/>
+											</svg>
 										</div>
 									{/if}
 									<div>
@@ -244,8 +257,14 @@
 								{#if edu.school_logo}
 									<img src={edu.school_logo} alt={edu.school} class="w-[55px] h-[55px] detroit-clip-xs object-cover shrink-0" />
 								{:else}
-									<div class="w-[55px] h-[55px] detroit-clip-xs flex items-center justify-center font-normal text-xl text-detroit-secondary shrink-0 border border-detroit-secondary/30 bg-gradient-to-br from-detroit-secondary/20 to-detroit-accent/20">
-										{edu.school ? edu.school.charAt(0) : '?'}
+									<div class="w-[55px] h-[55px] detroit-clip-xs flex items-center justify-center shrink-0 border border-detroit-secondary/30 bg-gradient-to-br from-detroit-secondary/20 to-detroit-accent/20">
+										<!-- Graduation cap icon as fallback -->
+										<svg class="w-7 h-7 text-detroit-secondary/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+											<path d="M12 14l9-5-9-5-9 5 9 5z"/>
+											<path d="M12 14l6.16-3.422a12.083 12.083 0 0 1 .665 6.479A11.952 11.952 0 0 0 12 20.055a11.952 11.952 0 0 0-6.824-2.998 12.078 12.078 0 0 1 .665-6.479L12 14z"/>
+											<path d="M12 14v7"/>
+											<path d="M21 9v6"/>
+										</svg>
 									</div>
 								{/if}
 								<div>
