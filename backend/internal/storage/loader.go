@@ -51,7 +51,14 @@ func (d *DataLoader) SetRefreshInterval(interval time.Duration) {
 // StartAutoRefresh starts a background goroutine that periodically fetches
 // fresh data from the GitHub repository. This keeps the data up-to-date
 // without requiring container restarts or external deployment triggers.
+// Set DISABLE_AUTO_REFRESH=true to disable (useful for local development).
 func (d *DataLoader) StartAutoRefresh(ctx context.Context) {
+	// Check if auto-refresh is disabled (for local development)
+	if os.Getenv("DISABLE_AUTO_REFRESH") == "true" {
+		log.Println("Auto-refresh disabled via DISABLE_AUTO_REFRESH=true")
+		return
+	}
+
 	log.Printf("Starting auto-refresh with interval: %v", d.refreshInterval)
 
 	go func() {

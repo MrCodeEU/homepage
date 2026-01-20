@@ -68,7 +68,7 @@ func (g *GitHubScraper) Name() string {
 type ProjectLink struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
-	Icon string `json:"icon,omitempty"` // Optional Material Design icon name (e.g., "mdi:rocket-launch")
+	Icon string `json:"icon,omitempty"`
 }
 
 // Project represents a GitHub project
@@ -198,9 +198,9 @@ func (g *GitHubScraper) Scrape() (any, error) {
 			images = append(images, readmeImages...)
 		}
 
-		// Separate images and badges, deduplicate both
-		allImages := deduplicateStrings(images)
-		project.Images, project.Badges = separateImagesAndBadges(allImages)
+		// Separate images and badges, then deduplicate
+		uniqueImages := deduplicateStrings(images)
+		project.Images, project.Badges = separateImagesAndBadges(uniqueImages)
 		log.Printf("  Total unique images for %s: %d (+ %d badges)", repo.Name, len(project.Images), len(project.Badges))
 
 		projects = append(projects, project)
@@ -426,9 +426,9 @@ func deduplicateStrings(slice []string) []string {
 	return result
 }
 
-// isBadgeURL checks if a URL is from a known badge service by examining the domain
+// isBadgeURL checks if an image URL is a badge/shield by checking the domain
 func isBadgeURL(imageURL string) bool {
-	// Known badge service domains
+	// List of known badge service domains
 	badgeDomains := []string{
 		"shields.io",
 		"img.shields.io",
@@ -439,30 +439,47 @@ func isBadgeURL(imageURL string) bool {
 		"travis-ci.org",
 		"travis-ci.com",
 		"circleci.com",
-		"github.com/workflows", // GitHub Actions badges
+		"github.com/workflows",
 	}
 
-	urlLower := strings.ToLower(imageURL)
-	for _, domain := range badgeDomains {
-		// Check if the domain appears in the host portion (after :// and before the next /)
-		if strings.Contains(urlLower, "://"+domain) ||
-			strings.Contains(urlLower, "://www."+domain) {
-			return true
-		}
-		// Also check for subdomains like img.shields.io
-		if strings.Contains(urlLower, "."+domain+"/") ||
-			strings.Contains(urlLower, "."+domain+"?") ||
-			strings.HasSuffix(urlLower, "."+domain) {
+	imgLower := strings.ToLower(imageURL)
+
+	// Extract domain part from URL
+	domainStart := strings.Index(imgLower, "://")
+	if domainStart == -1 {
+		return false // Not a valid URL
+	}
+	domainStart += 3 // Skip "://"
+
+	// Find the end of the domain (first / after protocol)
+	domainEnd := strings.Index(imgLower[domainStart:], "/")
+	var domain string
+	if domainEnd == -1 {
+		domain = imgLower[domainStart:]
+	} else {
+		domain = imgLower[domainStart : domainStart+domainEnd]
+	}
+
+	// Check if domain matches any badge domain
+	for _, badgeDomain := range badgeDomains {
+		if strings.Contains(domain, badgeDomain) {
 			return true
 		}
 	}
+
+	// Also check for github.com workflow badges
+	if strings.Contains(domain, "github.com") && strings.Contains(imgLower, "/workflows/") {
+		return true
+	}
+
 	return false
 }
 
-// separateImagesAndBadges splits images into regular images and badge images
+// separateImagesAndBadges splits images into regular images and badges
 func separateImagesAndBadges(images []string) (regularImages []string, badges []string) {
-	regularImages = make([]string, 0, len(images))
+	regularImages = make([]string, 0)
 	badges = make([]string, 0)
+
 	for _, img := range images {
 		if isBadgeURL(img) {
 			badges = append(badges, img)
@@ -470,5 +487,6 @@ func separateImagesAndBadges(images []string) (regularImages []string, badges []
 			regularImages = append(regularImages, img)
 		}
 	}
+
 	return regularImages, badges
 }

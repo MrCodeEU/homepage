@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-20T14:31:12.643147138Z",
+  "generated_at": "2026-01-20T17:26:53.273915407+01:00",
   "source": "github",
   "version": "1.0.0",
   "data": [
@@ -11,7 +11,14 @@
       "language": "Go",
       "topics": [],
       "images": [],
-      "featured": true
+      "badges": [],
+      "featured": true,
+      "links": [
+        {
+          "name": "Live",
+          "url": "https://mljr.eu"
+        }
+      ]
     },
     {
       "name": "nightscout-display",
@@ -21,12 +28,15 @@
       "language": "TypeScript",
       "topics": [],
       "images": [
-        "https://img.shields.io/github/v/release/yourusername/nightscout-display?style=flat-square",
-        "https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square",
         "https://raw.githubusercontent.com/MrCodeEU/nightscout-display/main/assets/number.png",
         "https://raw.githubusercontent.com/MrCodeEU/nightscout-display/main/assets/graph.png"
       ],
-      "featured": false
+      "badges": [
+        "https://img.shields.io/github/v/release/yourusername/nightscout-display?style=flat-square",
+        "https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"
+      ],
+      "featured": false,
+      "links": null
     },
     {
       "name": "nightscout-librelink-up-go",
@@ -37,13 +47,16 @@
       "topics": [],
       "images": [
         "https://picsum.photos/seed/nightscout/800/400",
-        "https://picsum.photos/seed/librelink/600/400",
+        "https://picsum.photos/seed/librelink/600/400"
+      ],
+      "badges": [
         "https://img.shields.io/github/actions/workflow/status/mrcodeeu/nightscout-librelink-up-go/build-and-publish.yml?branch=main",
         "https://img.shields.io/badge/docker-ghcr.io-blue",
         "https://img.shields.io/github/license/mrcodeeu/nightscout-librelink-up-go",
         "https://img.shields.io/github/go-mod/go-version/mrcodeeu/nightscout-librelink-up-go"
       ],
-      "featured": true
+      "featured": true,
+      "links": null
     },
     {
       "name": "service-template",
@@ -56,7 +69,18 @@
         "https://raw.githubusercontent.com/MrCodeEU/service-template/main/assets/prod.png",
         "https://raw.githubusercontent.com/MrCodeEU/service-template/main/assets/dev.png"
       ],
-      "featured": true
+      "badges": [],
+      "featured": true,
+      "links": [
+        {
+          "name": "Live",
+          "url": "https://template.mljr.eu"
+        },
+        {
+          "name": "Staging",
+          "url": "https://template.dev.mljr.eu"
+        }
+      ]
     }
   ]
 }
