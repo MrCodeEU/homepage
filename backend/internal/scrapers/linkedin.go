@@ -572,8 +572,11 @@ func (l *LinkedInScraper) extractProfileData(ctx context.Context) (*models.Linke
 		log.Printf("Warning: failed to extract profile info: %v", err)
 	}
 
+	// Clean the profile URL for subpage navigation
+	baseURL := cleanProfileURL(l.profileURL)
+
 	// Navigate to experience details page for full experience data
-	experienceURL := l.profileURL + "/details/experience/"
+	experienceURL := baseURL + "/details/experience/"
 	log.Printf("Navigating to experience details: %s", experienceURL)
 	if err := l.extractExperienceFromDetailsPage(ctx, experienceURL, data); err != nil {
 		log.Printf("Warning: failed to extract experience from details page: %v", err)
@@ -584,7 +587,7 @@ func (l *LinkedInScraper) extractProfileData(ctx context.Context) (*models.Linke
 	}
 
 	// Navigate to education details page for full education data
-	educationURL := l.profileURL + "/details/education/"
+	educationURL := baseURL + "/details/education/"
 	log.Printf("Navigating to education details: %s", educationURL)
 	if err := l.extractEducationFromDetailsPage(ctx, educationURL, data); err != nil {
 		log.Printf("Warning: failed to extract education from details page: %v", err)
@@ -595,7 +598,7 @@ func (l *LinkedInScraper) extractProfileData(ctx context.Context) (*models.Linke
 	}
 
 	// Navigate to skills details page for full skills data
-	skillsURL := l.profileURL + "/details/skills/"
+	skillsURL := baseURL + "/details/skills/"
 	log.Printf("Navigating to skills details: %s", skillsURL)
 	if err := l.extractSkillsFromDetailsPage(ctx, skillsURL, data); err != nil {
 		log.Printf("Warning: failed to extract skills from details page: %v", err)
@@ -644,9 +647,24 @@ func (l *LinkedInScraper) extractProfile(ctx context.Context, data *models.Linke
 
 	// Extract profile photo URL and convert to base64 to bypass tracking protection
 	var photoURL string
-	if err := chromedp.Run(ctx,
-		chromedp.AttributeValue(`img.pv-top-card-profile-picture__image`, "src", &photoURL, nil, chromedp.AtLeast(0)),
-	); err == nil && photoURL != "" {
+	photoSelectors := []string{
+		`img.pv-top-card-profile-picture__image`,
+		`img.profile-photo-edit__preview`,
+		`.pv-top-card__photo img`,
+		`div.profile-photo-edit__preview img`,
+		`#profile-content img[class*="profile-picture"]`,
+	}
+
+	for _, selector := range photoSelectors {
+		if err := chromedp.Run(ctx,
+			chromedp.AttributeValue(selector, "src", &photoURL, nil, chromedp.AtLeast(0)),
+		); err == nil && photoURL != "" {
+			log.Printf("Found profile photo with selector: %s", selector)
+			break
+		}
+	}
+
+	if photoURL != "" {
 		data.Profile.PhotoURL = downloadImageAsBase64(photoURL)
 	}
 
@@ -695,6 +713,16 @@ func (l *LinkedInScraper) extractExperience(ctx context.Context, data *models.Li
 					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3');
 					if (logoImg && logoImg.src && !logoImg.src.includes('ghost')) {
 						exp.logo = logoImg.src;
+						// Try to get company name from alt text if we don't find it elsewhere
+						// Allow "Logo" but strip it
+						if (logoImg.alt) {
+							let alt = logoImg.alt.trim();
+							// Strip common prefixes/suffixes
+							alt = alt.replace(/^Logo von\s+/i, '').replace(/^Logo of\s+/i, '').replace(/\s+Logo$/i, '');
+							if (alt.length > 1) {
+								exp.companyFromAlt = alt;
+							}
+						}
 					}
 					
 					// Get all visible text spans
@@ -715,6 +743,11 @@ func (l *LinkedInScraper) extractExperience(ctx context.Context, data *models.Li
 							exp.company = companySpan.textContent.trim().split(' · ')[0].trim();
 						}
 					}
+
+					// Fallback: use alt text if we have it and no company yet
+					if (!exp.company && exp.companyFromAlt) {
+						exp.company = exp.companyFromAlt;
+					}
 					
 					// If no company from link, look in normal text spans
 					if (!exp.company) {
@@ -725,6 +758,9 @@ func (l *LinkedInScraper) extractExperience(ctx context.Context, data *models.Li
 							if (/\d{4}|heute|present|monat|year|·.*zeit/i.test(text)) continue;
 							// Skip if same as title
 							if (text === exp.title) continue;
+							// Skip if too long (likely a description/summary)
+							if (text.length > 70) continue;
+
 							// This is likely the company
 							const parts = text.split(' · ');
 							exp.company = parts[0].trim();
@@ -740,6 +776,9 @@ func (l *LinkedInScraper) extractExperience(ctx context.Context, data *models.Li
 							// Skip if it looks like a date, duration, or location
 							if (/\d{4}|heute|present|monat|jahr|year/i.test(text)) continue;
 							if (text === exp.title) continue;
+							// Skip if too long (likely a description)
+							if (text.length > 70) continue;
+
 							// Check if it's not a location (locations often have commas and country names)
 							if (!/,.*(?:österreich|austria|germany|deutschland|schweiz|switzerland)/i.test(text)) {
 								exp.company = text.split(' · ')[0].trim();
@@ -782,6 +821,17 @@ func (l *LinkedInScraper) extractExperience(ctx context.Context, data *models.Li
 					const descEl = item.querySelector('.inline-show-more-text span[aria-hidden="true"]');
 					if (descEl) {
 						exp.description = descEl.textContent.trim();
+					} else {
+						// Fallback: look for other text blocks that might be the summary
+						const possibleDesc = item.querySelectorAll('.t-14.t-normal.t-black span[aria-hidden="true"]');
+						for (const p of possibleDesc) {
+							const t = p.textContent.trim();
+							// If it's long and not the title/company, it's likely the description
+							if (t.length > 50 && t !== exp.title && t !== exp.company) {
+								exp.description = t;
+								break;
+							}
+						}
 					}
 					
 					// Validate: title and company should be different
@@ -1151,17 +1201,27 @@ func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, 
 				const experiences = [];
 
 				// Find all experience items - details page has different structure
-				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li');
+				// Try multiple selectors to be robust
+				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li, .pvs-list__container > div > ul > li');
 
 				items.forEach((item) => {
 					const exp = {};
 
 					// Get logo/company image
-					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3, img[data-delayed-url]');
+					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3, img[data-delayed-url], .ivm-view-attr__img-wrapper img');
 					if (logoImg) {
 						const src = logoImg.src || logoImg.getAttribute('data-delayed-url');
 						if (src && !src.includes('ghost') && !src.includes('data:image')) {
 							exp.logo = src;
+						}
+						// Try to get company name from alt text
+						if (logoImg.alt) {
+							let alt = logoImg.alt.trim();
+							// Strip common prefixes/suffixes
+							alt = alt.replace(/^Logo von\s+/i, '').replace(/^Logo of\s+/i, '').replace(/\s+Logo$/i, '');
+							if (alt.length > 1) {
+								exp.companyFromAlt = alt;
+							}
 						}
 					}
 
@@ -1173,6 +1233,9 @@ func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, 
 					const titleEl = item.querySelector('.t-bold span[aria-hidden="true"], .mr1.t-bold span[aria-hidden="true"]');
 					if (titleEl) {
 						exp.title = titleEl.textContent.trim();
+					} else if (texts.length > 0) {
+						// Fallback: first text might be title
+						exp.title = texts[0];
 					}
 
 					// Company - look for company link or normal text
@@ -1184,6 +1247,11 @@ func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, 
 						}
 					}
 
+					// Fallback: use alt text if we have it and no company yet
+					if (!exp.company && exp.companyFromAlt) {
+						exp.company = exp.companyFromAlt;
+					}
+
 					// If no company from link, look in normal text spans
 					if (!exp.company) {
 						const normalSpans = item.querySelectorAll('.t-14.t-normal:not(.t-black--light) span[aria-hidden="true"]');
@@ -1191,6 +1259,9 @@ func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, 
 							const text = span.textContent.trim();
 							if (/\d{4}|heute|present|monat|year|·.*zeit/i.test(text)) continue;
 							if (text === exp.title) continue;
+							// Skip if too long (likely a description/summary)
+							if (text.length > 70) continue;
+							
 							const parts = text.split(' · ');
 							exp.company = parts[0].trim();
 							break;
@@ -1230,13 +1301,14 @@ func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, 
 					if (descEl) {
 						const descText = descEl.textContent.trim();
 						// Only use as description if it's longer and not a date/company
-						if (descText.length > 50 && !/^\d{4}|^[A-Z][a-z]{2}\.?\s+\d{4}/.test(descText)) {
+						if (descText.length > 20 && !/^\d{4}|^[A-Z][a-z]{2}\.?\s+\d{4}/.test(descText)) {
 							exp.description = descText;
 						}
 					}
 
 					// Only add if we have meaningful data
-					if (exp.title && exp.title.length > 1 && exp.title !== exp.company) {
+					if (exp.title && exp.title.length > 1) {
+						// Don't skip just because title==company, sometimes they are same (e.g. Freelance)
 						experiences.push(exp);
 					}
 				});
@@ -1270,10 +1342,6 @@ func (l *LinkedInScraper) extractExperienceFromDetailsPage(ctx context.Context, 
 	seen := make(map[string]bool)
 
 	for _, raw := range rawExperiences {
-		if raw.Title == raw.Company && raw.Company != "" {
-			continue
-		}
-
 		key := fmt.Sprintf("%s|%s|%s", raw.Title, raw.Company, raw.DateRange)
 		if seen[key] {
 			continue
@@ -1340,13 +1408,13 @@ func (l *LinkedInScraper) extractEducationFromDetailsPage(ctx context.Context, u
 				const education = [];
 
 				// Find all education items
-				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li');
+				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li, .pvs-list__container > div > ul > li');
 
 				items.forEach((item) => {
 					const edu = {};
 
 					// Get logo/school image
-					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3, img[data-delayed-url]');
+					const logoImg = item.querySelector('img.ivm-view-attr__img--centered, img.EntityPhoto-square-3, img[data-delayed-url], .ivm-view-attr__img-wrapper img');
 					if (logoImg) {
 						const src = logoImg.src || logoImg.getAttribute('data-delayed-url');
 						if (src && !src.includes('ghost') && !src.includes('data:image')) {
@@ -1383,9 +1451,12 @@ func (l *LinkedInScraper) extractEducationFromDetailsPage(ctx context.Context, u
 					}
 
 					// Description/activities
-					const descEl = item.querySelector('.inline-show-more-text span[aria-hidden="true"]');
+					const descEl = item.querySelector('.inline-show-more-text span[aria-hidden="true"], .pvs-list__outer-container .t-14.t-normal span[aria-hidden="true"]');
 					if (descEl) {
-						edu.description = descEl.textContent.trim();
+						const descText = descEl.textContent.trim();
+						if (descText.length > 20) {
+							edu.description = descText;
+						}
 					}
 
 					// Validate entry
@@ -1490,7 +1561,7 @@ func (l *LinkedInScraper) extractSkillsFromDetailsPage(ctx context.Context, url 
 				const seen = new Set();
 
 				// Find all skill items - details page shows skills with endorsements
-				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li');
+				const items = document.querySelectorAll('li.pvs-list__paged-list-item, ul.pvs-list > li, .pvs-list__container > div > ul > li');
 
 				items.forEach((item) => {
 					// Skill name is usually in a bold span
@@ -1500,7 +1571,7 @@ func (l *LinkedInScraper) extractSkillsFromDetailsPage(ctx context.Context, url 
 						// Filter out non-skill items
 						if (skill &&
 							skill.length > 1 &&
-							skill.length < 60 &&
+							skill.length < 80 &&
 							!skill.includes('Show all') &&
 							!skill.includes('endorsement') &&
 							!skill.includes('Skills') &&
@@ -1509,12 +1580,23 @@ func (l *LinkedInScraper) extractSkillsFromDetailsPage(ctx context.Context, url 
 							seen.add(skill.toLowerCase());
 							skills.push(skill);
 						}
+					} else {
+						// Fallback: Check if the text itself is the skill (sometimes simple list)
+						const text = item.textContent.trim();
+						if (text && !text.includes('\n') && text.length < 50 && !seen.has(text.toLowerCase())) {
+							// Basic validation
+							if (!text.match(/endorsement|Show all/i)) {
+								seen.add(text.toLowerCase());
+								skills.push(text);
+							}
+						}
 					}
 				});
 
-				// Also try alternative selectors for skills page
+				// Also try alternative selectors for skills page if we found nothing
 				if (skills.length === 0) {
-					const altItems = document.querySelectorAll('[data-field="skill_card_skill_name"] span[aria-hidden="true"]');
+					// Look for span.visually-hidden or similar which sometimes holds the text
+					const altItems = document.querySelectorAll('[data-field="skill_card_skill_name"] span[aria-hidden="true"], .pvs-list__outer-container span.visually-hidden');
 					altItems.forEach((item) => {
 						const skill = item.textContent.trim();
 						if (skill && skill.length > 1 && skill.length < 60 && !seen.has(skill.toLowerCase())) {
@@ -1702,3 +1784,15 @@ func ExtractProfileURLUsername(url string) string {
 	}
 	return ""
 }
+
+// cleanProfileURL removes query parameters and trailing slashes from the profile URL
+func cleanProfileURL(url string) string {
+	// Remove query parameters
+	if idx := strings.Index(url, "?"); idx != -1 {
+		url = url[:idx]
+	}
+	// Remove trailing slash
+	url = strings.TrimSuffix(url, "/")
+	return url
+}
+

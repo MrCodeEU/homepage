@@ -7,9 +7,6 @@ dist/
 .vscode/
 build/
 
-# Cache directory for scraper cookies
-.cache/
-
 # Generated data
 data/
 backend/data/
