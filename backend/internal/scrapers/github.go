@@ -145,7 +145,7 @@ func (g *GitHubScraper) Scrape() (any, error) {
 		}
 
 		// Log found portfolio repo
-		log.Printf("Found portfolio repo: %s (featured: %v, %d images in metadata)", 
+		log.Printf("Found portfolio repo: %s (featured: %v, %d images in metadata)",
 			repo.Name, metadata.Featured, len(metadata.Images))
 
 		// Build project
@@ -269,7 +269,7 @@ func (g *GitHubScraper) checkPortfolioMarker(repoName string) (bool, PortfolioMe
 	// If .portfolio doesn't exist, check README for marker
 	readme, readmeErr := g.fetchREADME(repoName)
 	if readmeErr != nil {
-		// If both .portfolio and README don't exist or can't be fetched, 
+		// If both .portfolio and README don't exist or can't be fetched,
 		// this repo simply doesn't have a portfolio marker - not an error
 		return false, PortfolioMetadata{}, nil
 	}

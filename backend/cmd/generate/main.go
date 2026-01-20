@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	dataDir     = "./data/generated"
-	cacheDir    = "./.cache"
-	appVersion  = "1.0.0"
+	dataDir    = "./data/generated"
+	cacheDir   = "./.cache"
+	appVersion = "1.0.0"
 )
 
 var (

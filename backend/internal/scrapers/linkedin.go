@@ -1164,7 +1164,7 @@ func (l *LinkedInScraper) restoreCookies(ctx context.Context) (bool, error) {
 			if cookie.Expires > 0 && time.Unix(int64(cookie.Expires), 0).Before(time.Now()) {
 				continue
 			}
-			
+
 			// Set cookie - note: we don't set Expires as the cookie already has its expiration
 			// and the type conversion is complex
 			if err := network.SetCookie(cookie.Name, cookie.Value).

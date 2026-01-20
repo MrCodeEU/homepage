@@ -63,18 +63,18 @@ type tokenResponse struct {
 
 // stravaActivity represents activity from Strava API
 type stravaActivity struct {
-	ID                   int64   `json:"id"`
-	Name                 string  `json:"name"`
-	Distance             float64 `json:"distance"`
-	MovingTime           float64 `json:"moving_time"`
-	ElapsedTime          float64 `json:"elapsed_time"`
-	TotalElevationGain   float64 `json:"total_elevation_gain"`
-	Type                 string  `json:"type"`
-	StartDate            string  `json:"start_date"`
-	AverageSpeed         float64 `json:"average_speed"`
-	MaxSpeed             float64 `json:"max_speed"`
-	AverageHeartrate     float64 `json:"average_heartrate"`
-	MaxHeartrate         float64 `json:"max_heartrate"`
+	ID                 int64   `json:"id"`
+	Name               string  `json:"name"`
+	Distance           float64 `json:"distance"`
+	MovingTime         float64 `json:"moving_time"`
+	ElapsedTime        float64 `json:"elapsed_time"`
+	TotalElevationGain float64 `json:"total_elevation_gain"`
+	Type               string  `json:"type"`
+	StartDate          string  `json:"start_date"`
+	AverageSpeed       float64 `json:"average_speed"`
+	MaxSpeed           float64 `json:"max_speed"`
+	AverageHeartrate   float64 `json:"average_heartrate"`
+	MaxHeartrate       float64 `json:"max_heartrate"`
 }
 
 // stravaStats represents athlete stats from Strava API
