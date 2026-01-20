@@ -172,9 +172,10 @@ When using README markers:
    - The `images` array in `.portfolio` (if present)
    - Any `![alt](url)` markdown images in the README
 5. All relative image paths are converted to absolute GitHub raw URLs
-6. Badge images (shields.io) are filtered out
+6. Badge images (shields.io, codecov.io, etc.) are automatically separated from regular images
 7. Duplicate images are removed
 8. Links from `.portfolio` are added as buttons alongside the GitHub link
+9. Regular images are displayed in a carousel, badges are shown below the description
 
 ## Testing Locally
 
@@ -186,15 +187,24 @@ To test your portfolio configuration locally:
    export GITHUB_USERNAME=your-username
    export GITHUB_TOKEN=your-github-token
    ```
-3. Run the backend:
+3. Generate fresh data:
    ```bash
-   cd apps/homepage
-   make dev-backend
+   make generate-data
    ```
-4. Check the API response:
+4. Run the backend with auto-refresh disabled (to use local data):
+   ```bash
+   DISABLE_AUTO_REFRESH=true make dev-backend
+   ```
+5. Run the frontend:
+   ```bash
+   make dev-frontend
+   ```
+6. Check the API response:
    ```bash
    curl http://localhost:8080/api/projects | jq
    ```
+
+**Note:** By default, the backend auto-refreshes data from the GitHub repository on startup. Set `DISABLE_AUTO_REFRESH=true` to use locally generated data files instead.
 
 ## Image Carousel
 
@@ -205,7 +215,23 @@ When a project has multiple images, they are displayed in an auto-rotating carou
 - **Manual navigation**: Arrow buttons and dot indicators for manual control
 - **Image counter**: Shows current position (e.g., "2 / 5")
 
-**Note:** Badge images from shields.io are automatically filtered out from the carousel to only show actual project screenshots.
+## Badges
+
+Badge images from common services are automatically detected and displayed separately from the image carousel:
+
+**Supported badge domains:**
+- shields.io / img.shields.io
+- badge.fury.io
+- badgen.net
+- codecov.io
+- coveralls.io
+- travis-ci.org / travis-ci.com
+- circleci.com
+- GitHub Actions workflow badges
+
+Badges are displayed below the project description as small inline images, while regular screenshots appear in the carousel above.
+
+**Note:** Detection is based on the image URL domain, not the filename. An image named `my-badge.png` from your repository will be treated as a regular image, not a badge.
 
 ## Image Best Practices
 

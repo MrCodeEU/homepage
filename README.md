@@ -6,6 +6,9 @@ A modern personal homepage showcasing portfolio projects, CV, and activity stats
 
 - 🎨 **Auto-discovery** of portfolio projects from GitHub repositories
 - 📊 **Dynamic content** from multiple data sources (GitHub, Strava, LinkedIn)
+- 🖼️ **Image carousel** with auto-switching for project screenshots
+- 🔗 **Custom links** support (Live, Staging, Docs) with auto-detected icons
+- 🏷️ **Badge display** - shields.io badges shown separately from images
 - 🐳 **Containerized** deployment with Docker
 - 🔄 **Real-time updates** via background scrapers
 - 🎯 **Portfolio markers** - Flag repos with `.portfolio` file or README markers
@@ -57,6 +60,7 @@ volumes:
 | `GITHUB_USERNAME` | Yes | Your GitHub username for project discovery |
 | `GITHUB_TOKEN` | Yes | GitHub Personal Access Token (read-only) |
 | `CACHE_DIR` | No | Cache directory (default: `/data/cache`) |
+| `DISABLE_AUTO_REFRESH` | No | Set to `true` to disable auto-refresh from GitHub (for local dev) |
 
 ## Portfolio Markers
 
@@ -74,6 +78,10 @@ Create `.portfolio` in your repository root:
   "images": [
     "https://example.com/screenshot.png",
     "./assets/demo.gif"
+  ],
+  "links": [
+    {"name": "Live", "url": "https://myproject.com"},
+    {"name": "Staging", "url": "https://staging.myproject.com"}
   ]
 }
 ```

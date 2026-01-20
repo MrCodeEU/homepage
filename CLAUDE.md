@@ -109,7 +109,11 @@ cd backend && go build -o homepage ./cmd/server
   - Checks for `.portfolio` file (JSON) or `<!-- PORTFOLIO -->` / 🎨 in README
   - Extracts images from `.portfolio` and README markdown
   - Converts relative image paths to raw.githubusercontent.com URLs
+  - Separates badge images (shields.io, codecov.io, etc.) from regular images using domain detection
+  - Supports custom links with optional icons
 - `internal/storage/` - File-based cache with TTL (JSON files in CACHE_DIR)
+  - `DataLoader` - Loads pre-generated JSON data files
+  - Auto-refresh from GitHub raw URLs on startup (disable with `DISABLE_AUTO_REFRESH=true`)
 
 **Key Implementation Details:**
 - GitHub API uses Bearer token authentication
@@ -177,10 +181,11 @@ Projects are auto-discovered from GitHub when they have:
 - 🎨 emoji
 
 **Frontend Features:**
-- Image carousel with auto-switching (3s interval), pause on hover
+- Image carousel with auto-switching (3s interval), pause on hover, keyboard accessible
+- Badge images (shields.io, codecov.io, etc.) displayed separately below description
 - Link buttons with auto-detected icons based on name (Live→globe, Staging→flask, Docs→book, Demo→play)
+- Custom icons supported via `icon` field in links (e.g., `"icon": "mdi:rocket-launch"`)
 - GitHub link always shown alongside custom links
-- Badge images (shields.io) are automatically filtered from carousels
 
 See PORTFOLIO.md for full documentation.
 
@@ -193,6 +198,7 @@ See PORTFOLIO.md for full documentation.
 **Optional:**
 - `PORT` - Server port (default: 8080)
 - `CACHE_DIR` - Cache directory (default: ./data/cache)
+- `DISABLE_AUTO_REFRESH` - Set to `true` to disable auto-refresh from GitHub (useful for local development with generated data)
 - `STRAVA_*` / `LINKEDIN_*` - Future integrations
 
 ## Testing Strategy
