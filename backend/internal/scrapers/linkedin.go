@@ -167,11 +167,18 @@ func (l *LinkedInScraper) Scrape() (any, error) {
 	ctx, cancel = context.WithTimeout(ctx, linkedInTimeoutSec*time.Second)
 	defer cancel()
 
+	// First navigate to LinkedIn to establish a connection
+	log.Println("Navigating to LinkedIn...")
+	if err := chromedp.Run(ctx, chromedp.Navigate("https://www.linkedin.com")); err != nil {
+		log.Printf("Warning: Failed to navigate to LinkedIn: %v", err)
+		// Continue anyway, might still work
+	}
+
 	// Try to restore cookies from cache for faster login
 	cookiesRestored := l.restoreCookies(ctx)
 	if cookiesRestored {
 		log.Println("Restored cookies from cache, checking if session is valid...")
-		// Navigate to LinkedIn to check if session is valid
+		// Navigate to feed to check if session is valid
 		if err := chromedp.Run(ctx, chromedp.Navigate("https://www.linkedin.com/feed/")); err == nil {
 			// Check if we're logged in
 			var currentURL string
