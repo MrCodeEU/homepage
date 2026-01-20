@@ -212,7 +212,11 @@ func (s *StravaScraper) ensureAccessToken() error {
 	if err != nil {
 		return fmt.Errorf("failed to exchange token: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -250,7 +254,11 @@ func (s *StravaScraper) fetchAthleteStats() (*stravaStats, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch athlete: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Printf("Warning: failed to close response body: %v", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)

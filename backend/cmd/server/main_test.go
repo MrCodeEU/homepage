@@ -126,7 +126,9 @@ func setupTestData(t *testing.T) (cleanup func()) {
 	dataLoader = storage.NewDataLoader(tempDir)
 
 	return func() {
-		os.RemoveAll(tempDir)
+		if err := os.RemoveAll(tempDir); err != nil {
+			t.Logf("Warning: failed to clean up temp dir: %v", err)
+		}
 	}
 }
 
