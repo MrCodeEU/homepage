@@ -79,6 +79,7 @@ export interface Project {
 	language: string;
 	topics: string[];
 	images: string[];
+	badges: string[];
 	featured: boolean;
 	links: ProjectLink[];
 }

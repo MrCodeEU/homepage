@@ -80,6 +80,7 @@ type Project struct {
 	Language    string        `json:"language"`
 	Topics      []string      `json:"topics"`
 	Images      []string      `json:"images"`
+	Badges      []string      `json:"badges"`
 	Featured    bool          `json:"featured"`
 	Links       []ProjectLink `json:"links"`
 }
@@ -197,9 +198,10 @@ func (g *GitHubScraper) Scrape() (any, error) {
 			images = append(images, readmeImages...)
 		}
 
-		// Filter out badge images and deduplicate
-		project.Images = filterBadgeImages(deduplicateStrings(images))
-		log.Printf("  Total unique images for %s: %d", repo.Name, len(project.Images))
+		// Separate images and badges, deduplicate both
+		allImages := deduplicateStrings(images)
+		project.Images, project.Badges = separateImagesAndBadges(allImages)
+		log.Printf("  Total unique images for %s: %d (+ %d badges)", repo.Name, len(project.Images), len(project.Badges))
 
 		projects = append(projects, project)
 	}
@@ -457,13 +459,16 @@ func isBadgeURL(imageURL string) bool {
 	return false
 }
 
-// filterBadgeImages removes badge/shield images from the image list
-func filterBadgeImages(images []string) []string {
-	result := make([]string, 0, len(images))
+// separateImagesAndBadges splits images into regular images and badge images
+func separateImagesAndBadges(images []string) (regularImages []string, badges []string) {
+	regularImages = make([]string, 0, len(images))
+	badges = make([]string, 0)
 	for _, img := range images {
-		if !isBadgeURL(img) {
-			result = append(result, img)
+		if isBadgeURL(img) {
+			badges = append(badges, img)
+		} else {
+			regularImages = append(regularImages, img)
 		}
 	}
-	return result
+	return regularImages, badges
 }

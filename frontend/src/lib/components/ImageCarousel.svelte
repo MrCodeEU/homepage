@@ -90,7 +90,7 @@
 </script>
 
 <div
-	class="carousel-container relative overflow-hidden detroit-clip-lg"
+	class="carousel-container relative overflow-hidden detroit-clip-lg bg-black/40"
 	class:is-focused={isFocused}
 	style="height: {height};"
 	on:mouseenter={handleMouseEnter}
@@ -117,7 +117,7 @@
 			<img
 				src={image}
 				alt="{alt} - Image {index + 1}"
-				class="carousel-image w-full h-full object-cover transition-all duration-600"
+				class="carousel-image w-full h-full object-contain transition-all duration-600"
 				on:error={handleImageError}
 			/>
 		</div>

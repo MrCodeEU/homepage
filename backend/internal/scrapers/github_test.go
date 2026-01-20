@@ -493,38 +493,45 @@ func TestIsBadgeURL(t *testing.T) {
 	}
 }
 
-func TestFilterBadgeImages(t *testing.T) {
+func TestSeparateImagesAndBadges(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    []string
-		expected []string
+		name           string
+		input          []string
+		expectedImages []string
+		expectedBadges []string
 	}{
 		{
-			name:     "empty slice",
-			input:    []string{},
-			expected: []string{},
+			name:           "empty slice",
+			input:          []string{},
+			expectedImages: []string{},
+			expectedBadges: []string{},
 		},
 		{
-			name: "only badges - all filtered",
+			name: "only badges",
 			input: []string{
 				"https://img.shields.io/badge/version-1.0-blue",
 				"https://badge.fury.io/rb/rails.svg",
 			},
-			expected: []string{},
+			expectedImages: []string{},
+			expectedBadges: []string{
+				"https://img.shields.io/badge/version-1.0-blue",
+				"https://badge.fury.io/rb/rails.svg",
+			},
 		},
 		{
-			name: "only valid images - none filtered",
+			name: "only valid images",
 			input: []string{
 				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
 				"https://example.com/demo.jpg",
 			},
-			expected: []string{
+			expectedImages: []string{
 				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
 				"https://example.com/demo.jpg",
 			},
+			expectedBadges: []string{},
 		},
 		{
-			name: "mixed - badges filtered, images kept",
+			name: "mixed - separates correctly",
 			input: []string{
 				"https://img.shields.io/badge/version-1.0-blue",
 				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
@@ -532,36 +539,55 @@ func TestFilterBadgeImages(t *testing.T) {
 				"https://example.com/demo.jpg",
 				"https://codecov.io/gh/user/repo/badge.svg",
 			},
-			expected: []string{
+			expectedImages: []string{
 				"https://raw.githubusercontent.com/user/repo/main/screenshot.png",
 				"https://example.com/demo.jpg",
 			},
+			expectedBadges: []string{
+				"https://img.shields.io/badge/version-1.0-blue",
+				"https://badge.fury.io/rb/rails.svg",
+				"https://codecov.io/gh/user/repo/badge.svg",
+			},
 		},
 		{
-			name: "image with badge in filename - NOT filtered",
+			name: "image with badge in filename - stays in images",
 			input: []string{
 				"https://raw.githubusercontent.com/user/repo/main/user-badge-system.png",
 				"https://example.com/badge-icons/logo.png",
 			},
-			expected: []string{
+			expectedImages: []string{
 				"https://raw.githubusercontent.com/user/repo/main/user-badge-system.png",
 				"https://example.com/badge-icons/logo.png",
 			},
+			expectedBadges: []string{},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := filterBadgeImages(tt.input)
-			if len(result) != len(tt.expected) {
-				t.Errorf("filterBadgeImages() returned %d items, expected %d", len(result), len(tt.expected))
-				t.Errorf("  got: %v", result)
-				t.Errorf("  expected: %v", tt.expected)
-				return
+			images, badges := separateImagesAndBadges(tt.input)
+
+			if len(images) != len(tt.expectedImages) {
+				t.Errorf("separateImagesAndBadges() returned %d images, expected %d", len(images), len(tt.expectedImages))
+				t.Errorf("  got images: %v", images)
+				t.Errorf("  expected images: %v", tt.expectedImages)
+			} else {
+				for i, v := range images {
+					if v != tt.expectedImages[i] {
+						t.Errorf("images[%d] = %q, expected %q", i, v, tt.expectedImages[i])
+					}
+				}
 			}
-			for i, v := range result {
-				if v != tt.expected[i] {
-					t.Errorf("filterBadgeImages()[%d] = %q, expected %q", i, v, tt.expected[i])
+
+			if len(badges) != len(tt.expectedBadges) {
+				t.Errorf("separateImagesAndBadges() returned %d badges, expected %d", len(badges), len(tt.expectedBadges))
+				t.Errorf("  got badges: %v", badges)
+				t.Errorf("  expected badges: %v", tt.expectedBadges)
+			} else {
+				for i, v := range badges {
+					if v != tt.expectedBadges[i] {
+						t.Errorf("badges[%d] = %q, expected %q", i, v, tt.expectedBadges[i])
+					}
 				}
 			}
 		})

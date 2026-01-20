@@ -298,7 +298,27 @@
 										{project.name}
 									</span>
 								</h3>
-								<p class="text-detroit-text-muted text-sm leading-[1.8] flex-1 mb-6">{project.description || 'No description available'}</p>
+								<p class="text-detroit-text-muted text-sm leading-[1.8] flex-1 mb-4">{project.description || 'No description available'}</p>
+
+								<!-- Badges Section -->
+								{#if project.badges && project.badges.length > 0}
+									<div class="flex flex-wrap gap-2 mb-4">
+										{#each project.badges as badge}
+											<img
+												src={badge}
+												alt="Badge"
+												class="h-5 object-contain"
+												on:error={(e) => {
+													const target = e.currentTarget;
+													if (target instanceof HTMLImageElement) {
+														target.style.display = 'none';
+													}
+												}}
+											/>
+										{/each}
+									</div>
+								{/if}
+
 								<div class="flex justify-between items-center text-sm text-white/40 mb-4 pt-4 border-t border-detroit-border-primary">
 									{#if project.language}
 										<span class="flex items-center gap-2">
