@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-23T06:46:24.322612119Z",
+  "generated_at": "2026-01-24T06:41:19.643871768Z",
   "source": "github",
   "version": "1.0.0",
   "data": [
@@ -60,7 +60,7 @@
     },
     {
       "name": "service-template",
-      "description": "A stylish Go-based web service template for homelab automation with Docker containerization, CI/CD via GitHub Actions, and multi-environment support (production \u0026 staging).",
+      "description": "A Go-based web service template for my ansible based homelab automation with Docker containerization, CI/CD via GitHub Actions, and multi-environment support (production \u0026 staging).",
       "url": "https://github.com/MrCodeEU/service-template",
       "stars": 0,
       "language": "Go",
