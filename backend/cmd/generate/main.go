@@ -137,6 +137,10 @@ func generateGitHub(cfg *config.Config, cache storage.Cache, outputDir string) e
 		return fmt.Errorf("failed to scrape: %w", err)
 	}
 
+	if err := validateGitHubData(data); err != nil {
+		return fmt.Errorf("GitHub data validation failed: %w", err)
+	}
+
 	wrapped := models.GeneratedData{
 		GeneratedAt: time.Now(),
 		Source:      "github",
@@ -151,12 +155,7 @@ func generateStrava(cfg *config.Config, cache storage.Cache, outputDir string) e
 	log.Println("Generating Strava data...")
 
 	if cfg.StravaClientID == "" || cfg.StravaClientSecret == "" || cfg.StravaRefreshToken == "" {
-		log.Println("WARNING: Strava credentials incomplete:")
-		log.Printf("  STRAVA_CLIENT_ID present: %v", cfg.StravaClientID != "")
-		log.Printf("  STRAVA_CLIENT_SECRET present: %v", cfg.StravaClientSecret != "")
-		log.Printf("  STRAVA_REFRESH_TOKEN present: %v", cfg.StravaRefreshToken != "")
-		log.Println("Skipping Strava data generation")
-		return nil
+		return fmt.Errorf("strava credentials incomplete (need STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN)")
 	}
 
 	log.Println("Strava credentials verified")
@@ -170,6 +169,10 @@ func generateStrava(cfg *config.Config, cache storage.Cache, outputDir string) e
 	data, err := scraper.Scrape()
 	if err != nil {
 		return fmt.Errorf("failed to scrape: %w", err)
+	}
+
+	if err := validateStravaData(data); err != nil {
+		return fmt.Errorf("strava data validation failed: %w", err)
 	}
 
 	wrapped := models.GeneratedData{
@@ -198,9 +201,11 @@ func generateLinkedIn(cfg *config.Config, cache storage.Cache, outputDir string)
 	)
 	data, err := scraper.Scrape()
 	if err != nil {
-		// For MVP, if scraping fails, create a placeholder
-		log.Printf("Warning: LinkedIn scraping failed (%v), creating placeholder", err)
-		data = createLinkedInPlaceholder()
+		return fmt.Errorf("failed to scrape: %w", err)
+	}
+
+	if err := validateLinkedInData(data); err != nil {
+		return fmt.Errorf("LinkedIn data validation failed: %w", err)
 	}
 
 	wrapped := models.GeneratedData{
@@ -213,35 +218,55 @@ func generateLinkedIn(cfg *config.Config, cache storage.Cache, outputDir string)
 	return saveJSON(filepath.Join(outputDir, "linkedin.json"), wrapped)
 }
 
-func createLinkedInPlaceholder() *models.LinkedInData {
-	return &models.LinkedInData{
-		Profile: models.LinkedInProfile{
-			Name:     "Your Name",
-			Headline: "Software Engineer",
-			Location: "Vienna, Austria",
-			Summary:  "LinkedIn data requires manual configuration or authentication. See README for setup instructions.",
-		},
-		Experience: []models.LinkedInExperience{
-			{
-				Title:       "Software Engineer",
-				Company:     "Tech Company",
-				Location:    "Remote",
-				StartDate:   "2020-01",
-				EndDate:     "Present",
-				Description: "Building awesome software",
-			},
-		},
-		Education: []models.LinkedInEducation{
-			{
-				School:    "University",
-				Degree:    "Bachelor of Science",
-				Field:     "Computer Science",
-				StartDate: "2014",
-				EndDate:   "2018",
-			},
-		},
-		Skills: []string{"Go", "TypeScript", "Docker", "Kubernetes"},
+func validateGitHubData(data any) error {
+	projects, ok := data.([]scrapers.Project)
+	if !ok {
+		return fmt.Errorf("unexpected data type: %T", data)
 	}
+	if len(projects) == 0 {
+		return fmt.Errorf("no portfolio projects found")
+	}
+	return nil
+}
+
+func validateStravaData(data any) error {
+	// Handle both value and pointer types
+	var stravaData models.StravaData
+	switch v := data.(type) {
+	case models.StravaData:
+		stravaData = v
+	case *models.StravaData:
+		if v == nil {
+			return fmt.Errorf("strava data pointer is nil")
+		}
+		stravaData = *v
+	default:
+		return fmt.Errorf("unexpected data type: %T", data)
+	}
+	if stravaData.TotalStats.Count == 0 {
+		return fmt.Errorf("no activities found")
+	}
+	return nil
+}
+
+func validateLinkedInData(data any) error {
+	linkedInData, ok := data.(*models.LinkedInData)
+	if !ok {
+		return fmt.Errorf("unexpected data type: %T", data)
+	}
+	if linkedInData == nil {
+		return fmt.Errorf("LinkedIn data is nil")
+	}
+	if linkedInData.Profile.Name == "" {
+		return fmt.Errorf("profile name is empty")
+	}
+	if len(linkedInData.Experience) == 0 {
+		return fmt.Errorf("no experience data found")
+	}
+	if len(linkedInData.Education) == 0 {
+		return fmt.Errorf("no education data found")
+	}
+	return nil
 }
 
 func saveJSON(filename string, data interface{}) error {

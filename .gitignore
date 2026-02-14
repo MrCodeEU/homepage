@@ -11,6 +11,9 @@ build/
 data/
 backend/data/
 
+# Cache (contains session cookies/tokens)
+backend/.cache/
+
 # Playwright
 /test-results/
 /playwright-report/

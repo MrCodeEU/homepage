@@ -118,11 +118,17 @@ generate-data:
 	@echo "    - GITHUB_TOKEN, GITHUB_USERNAME"
 	@echo "    - STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN"
 	@echo "    - LINKEDIN_EMAIL, LINKEDIN_PASSWORD, LINKEDIN_TOTP_SECRET"
+	@echo ""
+	@echo "Usage: make generate-data [SOURCES=all|github|strava|linkedin] [VERBOSE=true]"
+	@echo "Examples:"
+	@echo "  make generate-data                           # Generate all data"
+	@echo "  make generate-data SOURCES=linkedin          # Generate only LinkedIn data"
+	@echo "  make generate-data SOURCES=github VERBOSE=true  # Generate GitHub with verbose output"
 	@if [ -f .env ]; then \
 		echo "Loading environment from .env file..."; \
-		set -a && . ./.env && set +a && cd backend && go run cmd/generate/main.go -output ./data/generated -verbose; \
+		set -a && . ./.env && set +a && cd backend && go run cmd/generate/main.go -output ./data/generated -sources $(or $(SOURCES),all) $(if $(filter true,$(VERBOSE)),-verbose,); \
 	else \
-		cd backend && go run cmd/generate/main.go -output ./data/generated -verbose; \
+		cd backend && go run cmd/generate/main.go -output ./data/generated -sources $(or $(SOURCES),all) $(if $(filter true,$(VERBOSE)),-verbose,); \
 	fi
 	@echo "✅ Data generation complete"
 
