@@ -1,0 +1,29 @@
+.env
+node_modules/
+*.md
+!README.md
+!CLAUDE.md
+dist/
+.vscode/
+build/
+
+# Generated data
+data/
+backend/data/
+
+# Cache (contains session cookies/tokens)
+backend/.cache/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# SvelteKit
+.svelte-kit/
+backend/cmd/server/static/.claude/
+
+
+*.exe
