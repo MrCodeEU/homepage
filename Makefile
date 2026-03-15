@@ -1,0 +1,142 @@
+.PHONY: help dev build-docker run-docker clean install \
+	test test-frontend test-backend test-watch \
+	generate-data lint lint-frontend lint-backend format check-all
+
+help:
+	@echo "Homepage Development Commands:"
+	@echo ""
+	@echo "Development:"
+	@echo "  make install          - Install all dependencies (frontend + backend)"
+	@echo "  make dev              - Run frontend dev server (port 5173)"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test             - Run all tests (frontend + backend)"
+	@echo "  make test-frontend    - Run frontend tests"
+	@echo "  make test-backend     - Run backend tests"
+	@echo "  make test-watch       - Run frontend tests in watch mode"
+	@echo ""
+	@echo "Data Generation:"
+	@echo "  make generate-data    - Generate data from APIs (requires credentials)"
+	@echo ""
+	@echo "Linting & Formatting:"
+	@echo "  make lint             - Run all linters"
+	@echo "  make lint-frontend    - Lint frontend code"
+	@echo "  make lint-backend     - Lint backend code"
+	@echo "  make format           - Format all code"
+	@echo "  make check-all        - Run all checks (lint + test + type-check)"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make build-docker     - Build Docker image (SvelteKit + Caddy)"
+	@echo "  make run-docker       - Run Docker container (Caddy on :8080)"
+	@echo ""
+	@echo "Utilities:"
+	@echo "  make clean            - Clean build artifacts"
+	@echo ""
+
+install:
+	@echo "Installing frontend dependencies..."
+	cd frontend && npm install
+	@echo "Downloading Go dependencies..."
+	cd backend && go mod download
+	@echo "✅ Dependencies installed"
+
+dev:
+	@echo "Starting dev server on http://localhost:5173"
+	@echo "(Data loaded from backend/data/generated/ at dev time)"
+	cd frontend && npm run dev
+
+build-docker:
+	@echo "Building Docker image..."
+	docker build -t homepage:latest .
+	@echo "✅ Docker image built: homepage:latest"
+
+run-docker:
+	@echo "Stopping existing container if running..."
+	docker stop homepage && docker rm homepage || true
+	@echo "Running Docker container..."
+	docker run -d \
+		--name homepage \
+		-p 8080:80 \
+		homepage:latest
+	@echo "✅ Container running: http://localhost:8080"
+	@echo "View logs: docker logs -f homepage"
+	@echo "Stop: docker stop homepage && docker rm homepage"
+
+# Testing
+test: test-backend test-frontend
+	@echo "✅ All tests passed"
+
+test-backend:
+	@echo "Running backend tests..."
+	cd backend && go test -v -race -coverprofile=coverage.out ./...
+	@echo "✅ Backend tests passed"
+
+test-frontend:
+	@echo "Running frontend tests..."
+	cd frontend && npm run test
+	@echo "✅ Frontend tests passed"
+
+test-watch:
+	@echo "Running frontend tests in watch mode..."
+	cd frontend && npm run test:watch
+
+# Data Generation
+generate-data:
+	@echo "Generating data from APIs..."
+	@echo "⚠️  This requires API credentials in environment variables:"
+	@echo "    - GITHUB_TOKEN, GITHUB_USERNAME"
+	@echo "    - STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, STRAVA_REFRESH_TOKEN"
+	@echo "    - LINKEDIN_EMAIL, LINKEDIN_PASSWORD, LINKEDIN_TOTP_SECRET"
+	@echo ""
+	@echo "Usage: make generate-data [SOURCES=all|github|strava|linkedin] [VERBOSE=true]"
+	@echo "Examples:"
+	@echo "  make generate-data                           # Generate all data"
+	@echo "  make generate-data SOURCES=linkedin          # Generate only LinkedIn data"
+	@echo "  make generate-data SOURCES=github VERBOSE=true  # Generate GitHub with verbose output"
+	@if [ -f .env ]; then \
+		echo "Loading environment from .env file..."; \
+		set -a && . ./.env && set +a && cd backend && go run cmd/generate/main.go -output ./data/generated -sources $(or $(SOURCES),all) $(if $(filter true,$(VERBOSE)),-verbose,); \
+	else \
+		cd backend && go run cmd/generate/main.go -output ./data/generated -sources $(or $(SOURCES),all) $(if $(filter true,$(VERBOSE)),-verbose,); \
+	fi
+	@echo "✅ Data generation complete"
+
+# Linting
+lint: lint-backend lint-frontend
+	@echo "✅ All linting passed"
+
+lint-backend:
+	@echo "Linting backend code..."
+	@if ! command -v golangci-lint &> /dev/null; then \
+		echo "golangci-lint not found. Installing..."; \
+		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
+	fi
+	cd backend && golangci-lint run ./...
+	@echo "✅ Backend linting passed"
+
+lint-frontend:
+	@echo "Linting frontend code..."
+	cd frontend && npm run lint
+	@echo "✅ Frontend linting passed"
+
+# Formatting
+format:
+	@echo "Formatting code..."
+	cd frontend && npm run format
+	cd backend && gofmt -w .
+	@echo "✅ Code formatted"
+
+# Comprehensive check
+check-all: lint test
+	@echo "Running type checks..."
+	cd frontend && npm run check
+	@echo "✅ All checks passed"
+
+clean:
+	@echo "Cleaning build artifacts..."
+	rm -rf frontend/build
+	rm -rf frontend/.svelte-kit
+	rm -rf frontend/node_modules
+	rm -f backend/homepage
+	@echo "✅ Clean complete"
+

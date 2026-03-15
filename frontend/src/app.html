@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Personal Homepage</title>
+
+		<!-- Preconnect to Google Fonts early (mljr-css @imports them inside the CSS) -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+		<!-- Google Fonts loaded async (display=swap ensures text shows with fallback immediately) -->
+		<link rel="preload" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Nunito:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+		<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Nunito:wght@300;400;500;600;700&display=swap" /></noscript>
+
+		<!-- Preconnect to third-party origins used at runtime -->
+		<link rel="preconnect" href="https://api.iconify.design" />
+		<link rel="preconnect" href="https://picsum.photos" />
+		<link rel="dns-prefetch" href="https://fastly.picsum.photos" />
+
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

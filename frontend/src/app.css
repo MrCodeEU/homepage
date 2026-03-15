@@ -1,0 +1,462 @@
+@import "tailwindcss";
+
+/* Import only the mljr-css modules we actually use (44KB vs 306KB full bundle) */
+@import "mljr-css/src/themes/variables.css";
+@import "mljr-css/src/base/reset.css";
+@import "mljr-css/src/base/typography.css";
+@import "mljr-css/src/layout/navbar.css";
+@import "mljr-css/src/layout/footer.css";
+@import "mljr-css/src/components/footer.css";
+@import "mljr-css/src/components/button.css";
+@import "mljr-css/src/components/card.css";
+@import "mljr-css/src/components/badge.css";
+@import "mljr-css/src/components/chip.css";
+@import "mljr-css/src/components/carousel.css";
+@import "mljr-css/src/components/avatar.css";
+@import "mljr-css/src/components/pagination.css";
+@import "mljr-css/src/components/tabs.css";
+@import "mljr-css/src/components/cookie-banner.css";
+@import "mljr-css/src/components/tooltip.css";
+@import "mljr-css/src/components/legal-page.css";
+@import "mljr-css/src/utilities/utilities.css";
+
+/* ─── Global resets ─────────────────────────────────────────────────── */
+
+html {
+	scroll-behavior: smooth;
+	scroll-padding-top: 5rem;
+}
+
+body {
+	background: var(--mljr-bg-gradient);
+	background-attachment: fixed;
+	color: var(--mljr-text);
+	font-family: var(--mljr-font-sans);
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* ─── Page container (replaces max-w-7xl mx-auto px-4…) ─────────────── */
+
+.page-container {
+	max-width: 80rem;
+	margin: 0 auto;
+	padding: 5rem 1rem 0;
+	position: relative;
+	z-index: 10;
+}
+
+@media (min-width: 640px) {
+	.page-container {
+		padding-left: 1.5rem;
+		padding-right: 1.5rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.page-container {
+		padding-left: 2rem;
+		padding-right: 2rem;
+	}
+}
+
+/* ─── Transparent card overlay ──────────────────────────────────────── */
+
+.transparent-card {
+	background: rgba(255, 255, 255, 0.65) !important;
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
+	border: 1px solid rgba(255, 255, 255, 0.4);
+	border-radius: var(--mljr-radius-xl);
+	box-shadow: var(--mljr-clay-shadow-sm);
+}
+
+.dark .transparent-card,
+[data-theme='dark'] .transparent-card {
+	background: rgba(42, 37, 34, 0.72) !important;
+	border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Section headings ──────────────────────────────────────────────── */
+
+.section-heading {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--mljr-text);
+	margin-bottom: 1.25rem;
+}
+
+/* ─── Main 2/3 + 1/3 layout ─────────────────────────────────────────── */
+
+.main-content-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 2.5rem;
+	align-items: start;
+}
+
+@media (min-width: 1024px) {
+	.main-content-grid {
+		grid-template-columns: 2fr 1fr;
+	}
+}
+
+/* ─── Experience grid ───────────────────────────────────────────────── */
+
+.experience-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+	.experience-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+/* Experience card (plain div, not mljr Card) */
+.exp-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	overflow: hidden;
+}
+
+.exp-card-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 0.875rem 1rem;
+}
+
+.exp-description {
+	font-size: 0.75rem;
+	color: var(--mljr-text-secondary);
+	line-height: 1.5;
+	padding: 0 1rem 0.875rem;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* ─── Company / School logos ────────────────────────────────────────── */
+
+.company-logo,
+.school-logo {
+	width: 48px;
+	height: 48px;
+	border-radius: var(--mljr-radius-md);
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.logo-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--mljr-primary-100);
+	color: var(--mljr-primary-600);
+}
+
+.logo-placeholder.secondary {
+	background: var(--mljr-secondary-100);
+	color: var(--mljr-secondary-600);
+}
+
+.dark .logo-placeholder,
+[data-theme='dark'] .logo-placeholder {
+	background: rgba(249, 115, 22, 0.15);
+}
+
+.dark .logo-placeholder.secondary,
+[data-theme='dark'] .logo-placeholder.secondary {
+	background: rgba(168, 85, 247, 0.15);
+}
+
+/* ─── Education cards ───────────────────────────────────────────────── */
+
+.edu-card {
+	overflow: hidden;
+}
+
+.edu-card-inner {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 0.875rem 1rem;
+}
+
+.school-logo {
+	width: 40px;
+	height: 40px;
+}
+
+/* ─── Projects grid ─────────────────────────────────────────────────── */
+
+.projects-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+	.projects-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 1024px) {
+	.projects-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+/* Project card */
+.project-card {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.project-media {
+	position: relative;
+	height: 200px;
+	overflow: hidden;
+	border-radius: var(--mljr-radius-xl) var(--mljr-radius-xl) 0 0;
+	flex-shrink: 0;
+}
+
+.project-carousel {
+	height: 200px;
+}
+
+.project-featured-badge {
+	position: absolute;
+	top: 0.75rem;
+	left: 0.75rem;
+	z-index: 10;
+}
+
+.project-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 1rem;
+	border-top: 1px solid var(--mljr-border);
+}
+
+.project-footer {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	padding: 0.75rem 1rem;
+	border-top: 1px solid var(--mljr-border);
+}
+
+/* ─── Project link buttons ──────────────────────────────────────────── */
+
+.project-link-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.375rem 0.75rem;
+	border-radius: var(--mljr-radius);
+	font-size: 0.8rem;
+	font-weight: 500;
+	text-decoration: none;
+	transition: all var(--mljr-transition);
+	box-shadow: var(--mljr-clay-shadow-sm);
+	background: var(--mljr-frosted-bg-subtle);
+	border: 1px solid var(--mljr-border);
+	color: var(--mljr-text);
+}
+
+.project-link-btn:hover {
+	box-shadow: var(--mljr-clay-shadow);
+	transform: translateY(-1px);
+	border-color: var(--mljr-primary-400);
+	color: var(--mljr-primary-600);
+}
+
+.project-link-btn.primary {
+	background: var(--mljr-primary-500);
+	color: white;
+	border-color: var(--mljr-primary-600);
+}
+
+.project-link-btn.primary:hover {
+	background: var(--mljr-primary-600);
+	box-shadow: var(--mljr-clay-primary);
+}
+
+/* ─── Language dot ──────────────────────────────────────────────────── */
+
+.language-dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	display: inline-block;
+	flex-shrink: 0;
+}
+
+/* ─── Badge images ──────────────────────────────────────────────────── */
+
+.project-badge {
+	height: 18px;
+	object-fit: contain;
+}
+
+/* ─── Strava stats ──────────────────────────────────────────────────── */
+
+.strava-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 1rem;
+}
+
+@media (min-width: 640px) {
+	.strava-stats-grid {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+.stat-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 1rem 0.5rem;
+	border-radius: var(--mljr-radius-lg);
+	background: var(--mljr-frosted-bg-subtle);
+	border: 1px solid var(--mljr-border);
+	text-align: center;
+}
+
+.stat-value {
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: var(--mljr-text);
+	line-height: 1.2;
+}
+
+.stat-label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--mljr-text-muted);
+}
+
+.ytd-card {
+	padding: 1rem 1.5rem;
+	border-radius: var(--mljr-radius-lg);
+	background: linear-gradient(135deg, var(--mljr-primary-50), var(--mljr-secondary-50));
+	border: 1px solid var(--mljr-border);
+}
+
+.dark .ytd-card,
+[data-theme='dark'] .ytd-card {
+	background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(168,85,247,0.08));
+}
+
+.pr-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0.625rem 1.25rem;
+	border-radius: var(--mljr-radius-lg);
+	background: rgba(245, 158, 11, 0.1);
+	border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.run-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.625rem 0.75rem;
+	border-radius: var(--mljr-radius-md);
+	background: var(--mljr-frosted-bg-subtle);
+	transition: background var(--mljr-transition);
+}
+
+.run-row:hover {
+	background: var(--mljr-frosted-bg);
+}
+
+/* ─── Scroll indicator animation ────────────────────────────────────── */
+
+.scroll-indicator {
+	animation: bounce-gentle 2.5s infinite ease-in-out;
+}
+
+@keyframes bounce-gentle {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(8px); }
+}
+
+/* ─── Sidebar sticky on large screens ───────────────────────────────── */
+
+@media (min-width: 1024px) {
+	.sidebar-col {
+		position: sticky;
+		top: 5.5rem;
+		/* No overflow clipping — let box-shadows and borders show fully */
+	}
+}
+
+/* ─── Pagination wrapper ─────────────────────────────────────────────── */
+
+.pagination-wrapper {
+	display: flex;
+	justify-content: center;
+	padding: 3rem 0 1rem;
+}
+
+/* ─── Hero card inner (responsive padding + gap) ────────────────────── */
+
+.hero-card-inner {
+	padding: 2.5rem 3rem;
+	gap: 2.5rem;
+}
+
+/* ─── Mobile tweaks (< 640px) ───────────────────────────────────────── */
+
+@media (max-width: 639px) {
+	/* Hero: tighter padding on phones */
+	.hero-card-inner {
+		padding: 1.5rem 1.25rem;
+		gap: 1.5rem;
+	}
+
+	/* Section headings: slightly smaller */
+	.section-heading {
+		font-size: 1.25rem;
+	}
+
+	/* Strava run rows: stack stats vertically instead of cramming inline */
+	.run-row {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.375rem;
+	}
+
+	/* Less breathing room above/below pagination on mobile */
+	.pagination-wrapper {
+		padding: 1.5rem 0 0.5rem;
+	}
+
+	/* Page container: honour existing top padding (navbar height) */
+	.page-container {
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+	}
+}
