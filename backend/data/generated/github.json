@@ -1,0 +1,310 @@
+{
+  "generated_at": "2026-03-03T06:55:39.661333622Z",
+  "source": "github",
+  "version": "1.0.0",
+  "data": [
+    {
+      "name": "Flexbar-Plugin-Youtube-Music-Desktop-App",
+      "description": "A YouTube Music integration plugin for FlexBar that provides real-time music information display and playback controls via the YouTube Music Desktop App's Companion Server API.",
+      "url": "https://github.com/MrCodeEU/Flexbar-Plugin-Youtube-Music-Desktop-App",
+      "stars": 1,
+      "language": "JavaScript",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/flexbar1/800/450",
+        "https://picsum.photos/seed/flexbar2/800/450"
+      ],
+      "badges": [
+        "https://img.shields.io/badge/Node.js-18%2B-brightgreen",
+        "https://img.shields.io/badge/FlexDesigner-v1.1.0%2B-blue",
+        "https://img.shields.io/badge/ytmdesktop-v2.0.0%2B-Red",
+        "https://img.shields.io/badge/License-MIT-yellow.svg",
+        "https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-orange"
+      ],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "Game-of-Life-Multiplatform",
+      "description": "A Conway's Game of Life implementation built with Kotlin Multiplatform, running natively on mobile, desktop, and web from a single shared codebase.",
+      "url": "https://github.com/MrCodeEU/Game-of-Life-Multiplatform",
+      "stars": 1,
+      "language": "Kotlin",
+      "topics": [],
+      "images": [
+        "https://github.com/user-attachments/assets/2b9adcb5-d1f5-4519-82c9-893f9831a0f3"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": [
+        {
+          "name": "Live",
+          "url": "https://mljr.eu/game-of-life/"
+        }
+      ],
+      "priority": 0
+    },
+    {
+      "name": "jku-master-project-network-devices-power-consumption-analysis",
+      "description": "A web-based test runner for measuring power consumption and network throughput of devices under test, supporting UDP, TCP, and Layer 2 load generation with real-time FritzBox smart plug monitoring and SQLite-backed test storage.",
+      "url": "https://github.com/MrCodeEU/jku-master-project-network-devices-power-consumption-analysis",
+      "stars": 1,
+      "language": "TeX",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/jku-power1/800/450",
+        "https://picsum.photos/seed/jku-power2/800/450"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "LSTM-Based-Speaker-Diarization",
+      "description": "Bachelor thesis implementation of an LSTM-based speaker diarization system, comparing LSTM and BiLSTM architectures for d-vector generation with multiple clustering algorithms and comprehensive hyperparameter analysis.",
+      "url": "https://github.com/MrCodeEU/LSTM-Based-Speaker-Diarization",
+      "stars": 0,
+      "language": "Python",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/lstm-diar1/800/450",
+        "https://picsum.photos/seed/lstm-diar2/800/450",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/diarization_example.png",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/system_architecture.png",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/spectral_clustering_heatmap.png",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/mel_filter_bank_heatmap.png",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/clustering_comparison.png",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/neural_net_comparison.png",
+        "https://raw.githubusercontent.com/yourusername/your-repo-name/main/images/der_results.png"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "Lebenslauf",
+      "description": "A professional curriculum vitae and cover letter written in Typst, showcasing the Typst typesetting system as a modern, code-first alternative to LaTeX for structured document design.",
+      "url": "https://github.com/MrCodeEU/Lebenslauf",
+      "stars": 0,
+      "language": "Typst",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/lebenslauf1/800/450",
+        "https://picsum.photos/seed/lebenslauf2/800/450"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "LinuxHello",
+      "description": "A Windows Hello-style face authentication system for Linux with PAM integration, IR camera support, anti-spoofing protection, and a modern Wails-based web management GUI.",
+      "url": "https://github.com/MrCodeEU/LinuxHello",
+      "stars": 0,
+      "language": "Go",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/linuxhello1/800/450",
+        "https://picsum.photos/seed/linuxhello2/800/450"
+      ],
+      "badges": [],
+      "featured": true,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "WordWiz",
+      "description": "A SvelteKit web app that uses trie data structures to efficiently search for words matching pattern and length filters, supporting both English and German word lists.",
+      "url": "https://github.com/MrCodeEU/WordWiz",
+      "stars": 0,
+      "language": "JavaScript",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/wordwiz1/800/450",
+        "https://picsum.photos/seed/wordwiz2/800/450"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "cg-lab-2023-project-reineggersilber",
+      "description": "A WebGL-based 3D animated short film created for the Computer Graphics lab at JKU Linz, featuring heightmap terrain generation, dynamic lighting, and a multi-scene story with portals and an alien planet.",
+      "url": "https://github.com/MrCodeEU/cg-lab-2023-project-reineggersilber",
+      "stars": 0,
+      "language": "JavaScript",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/cglab1/800/450",
+        "https://picsum.photos/seed/cglab2/800/450"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "homelab-speedtest",
+      "description": "A homelab network performance monitoring tool that measures bandwidth and latency between devices using a Go-based SSH worker, with a real-time Svelte dashboard, alert rules via ntfy, and Docker deployment.",
+      "url": "https://github.com/MrCodeEU/homelab-speedtest",
+      "stars": 0,
+      "language": "Svelte",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/homelabspeed1/800/450",
+        "https://picsum.photos/seed/homelabspeed2/800/450"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "homepage",
+      "description": "Personal homepage with automated data aggregation",
+      "url": "https://github.com/MrCodeEU/homepage",
+      "stars": 0,
+      "language": "HTML",
+      "topics": [],
+      "images": [],
+      "badges": [],
+      "featured": true,
+      "links": [
+        {
+          "name": "Live",
+          "url": "https://mljr.eu"
+        }
+      ],
+      "priority": 0
+    },
+    {
+      "name": "mljrCSS",
+      "description": "A TailwindCSS-based CSS framework and Svelte 5 component library featuring a Claymorphism design system with warm orange primary and soft teal secondary colors, supporting both light and dark modes.",
+      "url": "https://github.com/MrCodeEU/mljrCSS",
+      "stars": 0,
+      "language": "Svelte",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/mljrcss1/800/450",
+        "https://picsum.photos/seed/mljrcss2/800/450"
+      ],
+      "badges": [],
+      "featured": true,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "nightscout-display",
+      "description": "A feature-rich Elgato Stream Deck plugin displaying live blood glucose data from Nightscout with number and graph display modes, color-coded readings, trend arrows, and configurable time ranges.",
+      "url": "https://github.com/MrCodeEU/nightscout-display",
+      "stars": 0,
+      "language": "TypeScript",
+      "topics": [],
+      "images": [
+        "https://raw.githubusercontent.com/MrCodeEU/nightscout-display/main/assets/number.png",
+        "https://raw.githubusercontent.com/MrCodeEU/nightscout-display/main/assets/graph.png"
+      ],
+      "badges": [
+        "https://img.shields.io/github/v/release/yourusername/nightscout-display?style=flat-square",
+        "https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square"
+      ],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "nightscout-librelink-up-go",
+      "description": "Lightweight Go service that syncs glucose data from Abbott's LibreLink Up to Nightscout CGM platform. Runs as a containerized microservice with automatic data polling and real-time updates.",
+      "url": "https://github.com/MrCodeEU/nightscout-librelink-up-go",
+      "stars": 0,
+      "language": "Go",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/nightscout/800/400",
+        "https://picsum.photos/seed/librelink/600/400"
+      ],
+      "badges": [
+        "https://img.shields.io/github/actions/workflow/status/mrcodeeu/nightscout-librelink-up-go/build-and-publish.yml?branch=main",
+        "https://img.shields.io/badge/docker-ghcr.io-blue",
+        "https://img.shields.io/github/license/mrcodeeu/nightscout-librelink-up-go",
+        "https://img.shields.io/github/go-mod/go-version/mrcodeeu/nightscout-librelink-up-go"
+      ],
+      "featured": true,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "nightscout-tray",
+      "description": "A cross-platform system tray application built with Wails3 and Svelte that shows real-time blood glucose data from Nightscout, including number display, graph visualization, and trend arrows.",
+      "url": "https://github.com/MrCodeEU/nightscout-tray",
+      "stars": 0,
+      "language": "Go",
+      "topics": [],
+      "images": [
+        "https://picsum.photos/seed/nightscout-tray1/800/450",
+        "https://picsum.photos/seed/nightscout-tray2/800/450"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": null,
+      "priority": 0
+    },
+    {
+      "name": "service-template",
+      "description": "A Go-based web service template for my ansible based homelab automation with Docker containerization, CI/CD via GitHub Actions, and multi-environment support (production \u0026 staging).",
+      "url": "https://github.com/MrCodeEU/service-template",
+      "stars": 0,
+      "language": "Go",
+      "topics": [],
+      "images": [
+        "https://raw.githubusercontent.com/MrCodeEU/service-template/main/assets/prod.png",
+        "https://raw.githubusercontent.com/MrCodeEU/service-template/main/assets/dev.png"
+      ],
+      "badges": [],
+      "featured": true,
+      "links": [
+        {
+          "name": "Live",
+          "url": "https://template.mljr.eu"
+        },
+        {
+          "name": "Staging",
+          "url": "https://template.dev.mljr.eu"
+        }
+      ],
+      "priority": 0
+    },
+    {
+      "name": "sudoku-gen",
+      "description": "A web app for generating and printing Sudoku puzzles in 9×9, 12×12, and 16×16 sizes across normal and jigsaw variants, with adjustable difficulty, a database-backed list viewer, and bulk printing with or without solutions.",
+      "url": "https://github.com/MrCodeEU/sudoku-gen",
+      "stars": 0,
+      "language": "Svelte",
+      "topics": [
+        "sudoku",
+        "sudoku-generator",
+        "sveltekit"
+      ],
+      "images": [
+        "https://github.com/user-attachments/assets/5fa180b4-6a72-46d9-a687-946324c545b3",
+        "https://github.com/user-attachments/assets/2c2ccb8f-4ccb-4297-8744-8336b1e37a77",
+        "https://github.com/user-attachments/assets/d24ab154-79e5-4ff6-aac9-0a1f09823702",
+        "https://github.com/user-attachments/assets/2d32025a-c403-4dc1-b668-968436c96712"
+      ],
+      "badges": [],
+      "featured": false,
+      "links": [
+        {
+          "name": "Live",
+          "url": "https://sudoku.mljr.eu"
+        }
+      ],
+      "priority": 0
+    }
+  ]
+}
