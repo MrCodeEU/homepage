@@ -1,9 +1,9 @@
 name: Generate Data
 
 on:
-  schedule:
+  #schedule:
     # Run every second day at 6 AM UTC
-    - cron: '0 6 */2 * *'
+    # - cron: '0 6 */2 * *'
 
   workflow_dispatch:
     inputs:
